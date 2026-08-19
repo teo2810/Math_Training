@@ -884,7 +884,7 @@ input:disabled { opacity: 0.65; }
     session.forEach((x,i) => {
       let line = `${i+1}. ${x.q} → ${x.user}`;
       if (x.ok) line += x.att > 1 ? ` (OK dopo ${x.att} tentativi)` : ` (OK)`;
-      else line += ` (SKIP – soluzione ${x.correct})`;
+      else line += ` (SKIP dopo ${x.att} tentativ${x.att===1?"o":"i"} – soluzione ${x.correct})`;
       line += ` ${x.sec}s\n`;
       body += line;
     });
