@@ -52,10 +52,12 @@ body.bg-err { background: #ffebe9; }
   overflow: hidden;
 }
 .card.full { height: 94vh; height: 94dvh; }
-.card > div:not(.hidden) { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.card > div:not(.hidden) { flex: 1; display: flex; flex-direction: column; }
 .menu, .end-screen { justify-content: center; }
 .ex-wrap { justify-content: flex-start; padding-top: 4px; }
-.settings { justify-content: flex-start; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.settings { justify-content: flex-start; }
+#screen-menu, #screen-ex, #screen-end { overflow: hidden; }
+#screen-set { overflow-y: auto; -webkit-overflow-scrolling: touch; }
 .card.border-ok { border-color: var(--ok); background: #f0fdf4; box-shadow: 0 0 0 3px rgba(52,199,89,0.18); }
 .card.border-warn { border-color: var(--warn); background: #fffbeb; box-shadow: 0 0 0 3px rgba(255,159,10,0.18); }
 .card.border-err { border-color: var(--err); background: #fef2f2; box-shadow: 0 0 0 3px rgba(255,59,48,0.2); }
@@ -161,6 +163,20 @@ body.bg-err { background: #ffebe9; }
 .btn-ghost {
   background: #e8e8ed;
   color: #3a3a3c;
+  position: relative;
+  overflow: hidden;
+}
+.btn-ghost.pressing::after {
+  content: "";
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 0%;
+  background: rgba(94,92,230,0.35);
+  animation: pressFill 0.9s linear forwards;
+}
+@keyframes pressFill {
+  from { width: 0%; }
+  to { width: 100%; }
 }
 .btn-soft { background: #636366; }
 .btn-danger { background: #ff3b30; }
@@ -221,12 +237,48 @@ body.bg-err { background: #ffebe9; }
   width: 100%;
   margin-top: 2px;
 }
+.menu-hint {
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 10px;
+  line-height: 1.4;
+  padding: 0 6px;
+}
 
 /* ESERCIZIO */
 .ex-wrap {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  position: relative;
+}
+.checkpoint {
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.97);
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 20px;
+  text-align: center;
+  z-index: 5;
+}
+.checkpoint-text {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #3a3a3c;
+  line-height: 1.4;
+}
+.checkpoint-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 220px;
 }
 .top {
   display: flex;
@@ -355,33 +407,33 @@ input:disabled { opacity: 0.65; }
 .settings {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 7px;
   padding: 2px 0;
 }
-.settings h2 { font-size: 1.1rem; text-align: center; color: #1c1c1e; font-weight: 800; }
+.settings h2 { font-size: 1.05rem; text-align: center; color: #1c1c1e; font-weight: 800; margin-bottom: 1px; }
 .settings-info {
-  font-size: 0.72rem;
-  line-height: 1.45;
+  font-size: 0.68rem;
+  line-height: 1.35;
   color: var(--muted);
   background: #f2f2f7;
   border-radius: 10px;
-  padding: 8px 10px;
+  padding: 6px 9px;
 }
 .settings-info strong { color: #3a3a3c; }
 .settings label {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 600;
   color: var(--muted);
   display: block;
-  margin-bottom: 3px;
+  margin-bottom: 2px;
   text-transform: uppercase;
   letter-spacing: 0.3px;
 }
 .settings input[type="email"],
 .settings input[type="text"] {
   width: 100%;
-  padding: 9px 11px;
-  font-size: 0.95rem;
+  padding: 7px 11px;
+  font-size: 0.9rem;
   border: 2px solid #d1d1d6;
   border-radius: 10px;
   outline: none;
@@ -400,8 +452,8 @@ input:disabled { opacity: 0.65; }
 .settings .row .btn {
   flex: 1;
   max-width: none;
-  height: 42px;
-  font-size: 0.88rem;
+  height: 38px;
+  font-size: 0.85rem;
 }
 
 @media (max-height: 480px) {
@@ -425,12 +477,13 @@ input:disabled { opacity: 0.65; }
       <button class="btn btn-start" id="btn-start">Inizia</button>
       <button class="btn btn-ghost" id="btn-settings">Impostazioni</button>
     </div>
+    <p class="menu-hint">Puoi fermarti quando vuoi con «Per oggi basta»: ogni 2 minuti te lo chiederò anch'io.</p>
   </div>
 
   <div id="screen-ex" class="ex-wrap hidden">
     <div class="top">
       <div class="level-wrap">
-        <div class="level-label">Difficoltà · <span id="coach-name-ex"></span></div>
+        <div class="level-label">Difficoltà</div>
         <div class="level-bar"><div class="level-fill" id="lvl-fill"></div></div>
       </div>
       <button class="btn-exit" id="btn-enough">Per oggi basta</button>
@@ -439,10 +492,17 @@ input:disabled { opacity: 0.65; }
       <div class="question anim-pop" id="qtext"></div>
     </div>
     <div class="input-zone">
-      <input type="text" id="ans" inputmode="decimal" placeholder="Risposta" autocomplete="off" enterkeyhint="done">
+      <input type="text" id="ans" inputmode="decimal" placeholder="Risposta" autocomplete="off" enterkeyhint="go">
       <button class="btn" id="btn-ok">Conferma</button>
       <button class="btn btn-ghost hidden" id="btn-skip">Passa oltre</button>
       <div id="fb" class="fb hidden"></div>
+    </div>
+    <div class="checkpoint hidden" id="checkpoint">
+      <p class="checkpoint-text">Stai giocando da un po'! Continuiamo ancora un po' o ci fermiamo qui per oggi?</p>
+      <div class="checkpoint-actions">
+        <button class="btn" id="cp-continue">Continua</button>
+        <button class="btn btn-soft" id="cp-stop">Per oggi basta</button>
+      </div>
     </div>
   </div>
 
@@ -455,7 +515,14 @@ input:disabled { opacity: 0.65; }
 
   <div id="screen-set" class="settings hidden">
     <h2>Impostazioni</h2>
-    <p class="settings-info">Allenamento di matematica per bambini. Il livello di difficoltà si adatta da solo in base alle risposte. A fine sessione parte un report via mail per il tutor.</p>
+    <p class="settings-info">Allenamento di matematica per bambini. Il bambino può fermarsi in qualsiasi momento con «Per oggi basta»; ogni 2 minuti l'app chiede comunque se continuare, così il gioco non prosegue all'infinito anche se il livello risulta troppo facile. A fine sessione parte un report via mail per il tutor.</p>
+    <p class="settings-info" id="scale-info"></p>
+    <p class="settings-info">
+      <strong>Per oggi basta</strong>: chiude subito la sessione e invia il report.<br>
+      <strong>Reset livello</strong>: riporta la difficoltà al minimo.<br>
+      <strong>Reset report</strong>: cancella lo storico degli esercizi.<br>
+      <strong>Reset tutto</strong>: cancella nome, email, livello e report.
+    </p>
     <div>
       <label>Nome</label>
       <input type="text" id="set-name" placeholder="Nome del ragazzo" autocomplete="off">
@@ -471,12 +538,6 @@ input:disabled { opacity: 0.65; }
     <div class="row">
       <button class="btn" id="btn-save">Salva</button>
     </div>
-    <p class="settings-info">
-      <strong>Per oggi basta</strong>: chiude subito la sessione e invia il report.<br>
-      <strong>Reset livello</strong>: riporta la difficoltà al minimo.<br>
-      <strong>Reset report</strong>: cancella lo storico degli esercizi.<br>
-      <strong>Reset tutto</strong>: cancella nome, email, livello e report.
-    </p>
     <div class="row">
       <button class="btn btn-soft" id="btn-reset-level">Reset livello</button>
       <button class="btn btn-soft" id="btn-reset-hist">Reset report</button>
@@ -495,8 +556,22 @@ input:disabled { opacity: 0.65; }
   let TUTOR = localStorage.getItem("m_email") || "";
   let TUTOR_NAME = localStorage.getItem("m_tutor_name") || "";
   let NAME = localStorage.getItem("m_name") || "";
-  const MAX_SEC = 300;
+  const CHECK_SEC = 120; // ogni quanto viene chiesto se continuare
   const MAX_LEVEL = 8;
+
+  // Scala di difficoltà: unica fonte usata sia dalla spiegazione in Impostazioni
+  // sia dal resoconto via mail. Per aggiungere nuovi tipi di calcolo in futuro
+  // (es. numeri a più cifre, potenze, ecc.) basta estendere questo array e la
+  // funzione build().
+  const LEVEL_INFO = [
+    { min: 1, max: 2, label: "Base",       desc: "Addizioni e sottrazioni semplici" },
+    { min: 3, max: 4, label: "Intermedio", desc: "+ moltiplicazioni e frazioni semplici" },
+    { min: 5, max: 6, label: "Avanzato",   desc: "+ lettura dell'orologio" },
+    { min: 7, max: 8, label: "Esperto",    desc: "+ divisioni" }
+  ];
+  function levelInfo(lvl) {
+    return LEVEL_INFO.find(t => lvl >= t.min && lvl <= t.max) || LEVEL_INFO[LEVEL_INFO.length - 1];
+  }
 
   let level = +localStorage.getItem("m_level") || 1;
   let history = JSON.parse(localStorage.getItem("m_hist") || "[]");
@@ -504,9 +579,9 @@ input:disabled { opacity: 0.65; }
   let session = [];
   let cur = null;
   let attempts = 0;
+  let busy = false;
   let qStart = 0;
-  let sessTimer = null;
-  let timeUp = false;
+  let checkTimer = null;
 
   const $ = id => document.getElementById(id);
   const card = $("card");
@@ -534,7 +609,6 @@ input:disabled { opacity: 0.65; }
   function updateLevelUI() {
     const pct = levelPct();
     $("lvl-fill").style.width = pct + "%";
-    $("coach-name-ex").textContent = NAME || "allenamento";
   }
   function updateMini() {
     $("coach-text").textContent = NAME ? `Ciao ${NAME}! Pronto a giocare?` : "Ciao! Pronto a giocare?";
@@ -611,7 +685,7 @@ input:disabled { opacity: 0.65; }
       if (addH && !addM) delta = addH===1 ? "1 ora" : `${addH} ore`;
       else if (addH && addM) delta = addH===1 ? "1 ora e mezza" : `${addH} ore e mezza`;
       else delta = "mezz'ora";
-      text = `Sono le ${start}. Tra ${delta}, che ora è?`;
+      text = `Sono le ${start}. Tra ${delta}, che ora sarà?`;
       allowed = [target, `${fh}.${String(fm).padStart(2,"0")}`, `${fh}:${String(fm).padStart(2,"0")}`];
       if (fm===0) {
         allowed.push(String(fh), String(fh).padStart(2,"0"));
@@ -623,7 +697,6 @@ input:disabled { opacity: 0.65; }
   }
 
   function nextQ() {
-    if (timeUp) { finish("Tempo scaduto, sei stato bravissimo!"); return; }
     let ex=null, tries=0;
     while (!ex && tries<40) {
       tries++;
@@ -645,36 +718,47 @@ input:disabled { opacity: 0.65; }
 
     const inp = $("ans");
     inp.value = "";
-    inp.disabled = false;
+    busy = false;
     $("btn-ok").disabled = false;
     $("btn-skip").classList.add("hidden");
     $("fb").className = "fb hidden";
     resetTheme();
     qStart = Date.now();
-    setTimeout(() => inp.focus(), 40);
+    inp.focus();
   }
 
   function start() {
     session = [];
-    timeUp = false;
     updateLevelUI();
     show("screen-ex");
-    if (sessTimer) clearTimeout(sessTimer);
-    sessTimer = setTimeout(() => { timeUp = true; }, MAX_SEC*1000);
+    scheduleCheckpoint();
     nextQ();
   }
 
+  function scheduleCheckpoint() {
+    if (checkTimer) clearTimeout(checkTimer);
+    checkTimer = setTimeout(showCheckpoint, CHECK_SEC*1000);
+  }
+  function showCheckpoint() {
+    $("checkpoint").classList.remove("hidden");
+  }
+  function hideCheckpoint() {
+    $("checkpoint").classList.add("hidden");
+  }
+
   function finish(msg) {
-    if (sessTimer) clearTimeout(sessTimer);
+    if (checkTimer) clearTimeout(checkTimer);
+    hideCheckpoint();
     save();
     sendMail();
     const n = NAME || "campione";
     $("end-title").textContent = msg || `Bravo ${n}! Hai finito`;
     const ok = session.filter(x=>x.ok).length;
+    const li = levelInfo(level);
     $("sum").innerHTML =
       `Esercizi fatti: <b>${session.length}</b><br>` +
       `Corretti: <b>${ok}</b><br>` +
-      `Livello: <b>${level}</b>`;
+      `Difficoltà: <b>${li.label}</b> (livello ${level}/${MAX_LEVEL})`;
     $("mail-note").textContent = TUTOR
       ? "Tra pochi secondi si aprirà l'app Mail: per inviare il report al tutor tocca «Invia»."
       : "Nessuna email del tutor impostata: vai in Impostazioni per configurarla e inviare il report.";
@@ -724,6 +808,7 @@ input:disabled { opacity: 0.65; }
   }
 
   function check() {
+    if (busy) return;
     const inp = $("ans");
     let val = inp.value.trim().replace(",", ".").replace(".", ":");
     if (!val) return;
@@ -739,7 +824,7 @@ input:disabled { opacity: 0.65; }
       fb.textContent = text;
       playFb(fb, "fb-ok", JOY_ANIMS);
       celebrate();
-      inp.disabled = true;
+      busy = true;
       $("btn-ok").disabled = true;
       $("btn-skip").classList.add("hidden");
       log(val, true, sec);
@@ -756,6 +841,7 @@ input:disabled { opacity: 0.65; }
   }
 
   function skip() {
+    if (busy) return;
     const sec = Math.round((Date.now()-qStart)/1000);
     theme("err");
     const fb = $("fb");
@@ -764,7 +850,7 @@ input:disabled { opacity: 0.65; }
     const tries = n===1 ? "1 tentativo" : `${n} tentativi`;
     fb.innerHTML = `${pick(SKIP_MSG)}<span class="fb-sub">Risposta: <b>${cur.target}</b> · ${tries}</span>`;
     playFb(fb, "fb-err", SAD_ANIMS);
-    $("ans").disabled = true;
+    busy = true;
     $("btn-ok").disabled = true;
     $("btn-skip").classList.add("hidden");
     log("SKIP", false, sec);
@@ -790,7 +876,8 @@ input:disabled { opacity: 0.65; }
     if (TUTOR_NAME) body += `Ciao ${TUTOR_NAME},\n\n`;
     body += `REPORT MATEMATICA`;
     if (NAME) body += ` – ${NAME}`;
-    body += `\n${now.toLocaleString("it-IT")}\nLivello: ${level}\n\n`;
+    const li = levelInfo(level);
+    body += `\n${now.toLocaleString("it-IT")}\nDifficoltà: ${li.label} – ${li.desc} (livello ${level}/${MAX_LEVEL})\n\n`;
     body += `OGGI\nEsercizi: ${session.length}\nCorretti: ${session.filter(x=>x.ok).length}\n`;
     if (session.length) body += `Tempo medio: ${Math.round(session.reduce((a,x)=>a+x.sec,0)/session.length)}s\n`;
     body += `\nDettaglio:\n`;
@@ -820,7 +907,9 @@ input:disabled { opacity: 0.65; }
   const setBtn = $("btn-settings");
   setBtn.addEventListener("pointerdown", e => {
     e.preventDefault();
+    setBtn.classList.add("pressing");
     pressTimer = setTimeout(() => {
+      setBtn.classList.remove("pressing");
       $("set-name").value = NAME;
       $("set-tutor-name").value = TUTOR_NAME;
       $("set-email").value = TUTOR;
@@ -828,8 +917,14 @@ input:disabled { opacity: 0.65; }
     }, 900);
   });
   ["pointerup","pointerleave","pointercancel"].forEach(ev =>
-    setBtn.addEventListener(ev, () => clearTimeout(pressTimer))
+    setBtn.addEventListener(ev, () => {
+      clearTimeout(pressTimer);
+      setBtn.classList.remove("pressing");
+    })
   );
+
+  $("cp-continue").onclick = () => { hideCheckpoint(); scheduleCheckpoint(); };
+  $("cp-stop").onclick = () => { hideCheckpoint(); enough(); };
 
   $("btn-save").onclick = () => {
     NAME = $("set-name").value.trim();
@@ -874,12 +969,16 @@ input:disabled { opacity: 0.65; }
 
   $("btn-start").onclick = start;
   $("btn-enough").onclick = enough;
+  $("btn-ok").addEventListener("pointerdown", e => e.preventDefault());
   $("btn-ok").onclick = check;
+  $("btn-skip").addEventListener("pointerdown", e => e.preventDefault());
   $("btn-skip").onclick = skip;
   $("btn-home").onclick = () => show("screen-menu");
-  $("ans").addEventListener("keypress", e => { if (e.key==="Enter") check(); });
+  $("ans").addEventListener("keypress", e => { if (e.key==="Enter") { e.preventDefault(); check(); } });
 
   updateLevelUI();
+  $("scale-info").innerHTML = "<strong>Scala difficoltà</strong> (si aggiorna da sola in base ai risultati):<br>" +
+    LEVEL_INFO.map(t => `${t.min===t.max? "Livello "+t.min : "Livelli "+t.min+"–"+t.max} – <strong>${t.label}</strong>: ${t.desc}`).join("<br>");
   show("screen-menu");
 })();
 </script>
