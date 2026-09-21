@@ -1,23 +1,22 @@
 # Allenamento Matematica
 
-App web a file singolo per l'allenamento di matematica (addizioni, sottrazioni, moltiplicazioni, divisioni, frazioni, orologio), pensata per bambini/ragazzi, con difficoltà adattiva e report via email per il tutor.
+App web a file singolo per l'allenamento di matematica (addizioni, sottrazioni, moltiplicazioni, divisioni, frazioni, orologio, percentuali), pensata per bambini/ragazzi, con difficoltà 0–10 impostabile dal tutor e report via email.
 
 ## Caratteristiche
 
 - Nessuna dipendenza esterna: un solo file `index.html`, funziona anche offline una volta caricato.
-- Difficoltà adattiva: si alza o si abbassa in automatico in base a correttezza e tempo di risposta.
-- Categorie di esercizi progressive: aritmetica → frazioni (da difficoltà 3) → orologio (da difficoltà 5) → divisioni (da difficoltà 7).
-- Fine sessione automatica dopo 5 minuti o su richiesta ("Per oggi basta").
-- Report riepilogativo inviato via `mailto:` al tutor, con dettaglio della sessione e statistiche ultimi 7/30 giorni.
-- Impostazioni (accesso con pressione prolungata sul pulsante "Impostazioni"): nome del ragazzo, nome ed email del tutor, reset di livello/report/tutto.
-- Dati salvati solo in locale nel browser (`localStorage`): nessun server, nessun tracciamento. Il file distribuito non contiene nomi né email preimpostate: la prima configurazione (nome, tutor, email) va fatta dalle Impostazioni.
+- Livello 0–10 settabile dal tutor con una barra in Impostazioni.
+- Opzione «Blocca livello»: il tutor fissa la difficoltà; senza blocco l'app si adatta ancora da sola.
+- Categorie progressive: addizioni semplici → sottrazioni → tabelline → frazioni → orologio → divisioni → mix adulto (2–3 cifre, percentuali, tre termini).
+- Fine sessione automatica dopo 2 minuti di checkpoint o su richiesta («Per oggi basta»).
+- Report riepilogativo inviato via `mailto:` al tutor.
+- Impostazioni (pressione prolungata su «Impostazioni»): nome, tutor, email, livello, blocco, reset.
+- Dati solo in `localStorage` del browser. Nessun server, nessuna sincronizzazione tra dispositivi.
 
-## Note tecniche
+## Remoto
 
-- Tutto lo stato (nome, email tutor, livello, storico esercizi) è salvato in `localStorage` del browser: cambiando browser o dispositivo i dati non si sincronizzano.
-- L'invio del report usa il link `mailto:`, quindi apre l'app di posta predefinita del dispositivo: l'utente deve comunque premere "Invia" per completare l'invio.
-- Ottimizzata per schermi mobili in verticale; il layout si adatta anche alla comparsa della tastiera virtuale.
+Non è possibile cambiare il livello a distanza. La PWA (o la pagina aperta) legge e scrive solo il `localStorage` di quel telefono. Per un controllo remoto servirebbe un backend (account tutor + sync).
 
 ## Licenza
 
-Uso personale/familiare. Nessuna licenza open source dichiarata: adattare liberamente per uso privato.
+Uso personale/familiare.
