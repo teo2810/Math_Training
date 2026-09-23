@@ -5,7 +5,7 @@ App web a file singolo per l'allenamento di matematica, pensata per un ragazzo, 
 ## Caratteristiche
 
 - Un solo file `index.html`, funziona anche offline una volta caricato.
-- Livello 1–8 settabile dal tutor in Impostazioni.
+- Livello 1–10 settabile dal tutor in Impostazioni.
 - Livello massimo: l'adattamento automatico non supera il tetto scelto dal tutor.
 - Opzione «Blocca livello»: la difficoltà resta ferma.
 - Dopo un errore: lo stesso calcolo viene riformulato in un altro modo (senza dare il risultato).
