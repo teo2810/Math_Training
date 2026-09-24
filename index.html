@@ -223,9 +223,18 @@ body,.card{background:#111113}
 .tutor-actions{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
 .tutor-actions .btn{height:32px;font-size:.72rem;width:auto;flex:1 1 30%;padding:0 8px}
 
-.dev-panel{margin-top:8px}
-.chk{display:flex;align-items:center;gap:8px;font-size:.78rem;font-weight:600;color:#3a3a3c;margin-top:6px;text-transform:none}
-.chk input{width:16px;height:16px;accent-color:#5e5ce6}
+.settings{overflow-y:auto;-webkit-overflow-scrolling:touch}
+.dev-panel{margin-top:8px;padding-bottom:24px}
+.dev-panel .row{margin-top:6px}
+.dev-panel .btn{height:40px;font-size:.85rem}
+#dev-packs{margin:6px 0}
+.chk{display:flex;align-items:center;gap:8px;font-size:.8rem;font-weight:600;color:#3a3a3c;margin-top:6px;text-transform:none}
+.chk input{width:18px;height:18px;accent-color:#5e5ce6;flex-shrink:0}
+.tutor-box{margin-top:8px}
+#tutor-live{white-space:pre-wrap;font-size:.72rem;line-height:1.35}
+#tutor-json{width:100%;min-height:88px;margin-top:8px;padding:8px;border-radius:12px;border:2px solid #d1d1d6;font-size:.72rem}
+.tutor-test-out{font-size:.68rem;white-space:pre-wrap;margin-top:6px}
+.tutor-row{font-size:.72rem;padding:3px 0;border-bottom:1px solid #e5e5ea}
 </style></head>
 <body>
 <div class="card" id="card">
@@ -256,7 +265,7 @@ body,.card{background:#111113}
 <button type="button" data-k=":">:</button><button type="button" data-k="0">0</button><button type="button" data-k="del">⌫</button>
 </div>
 <div class="pad-actions">
-<button class="btn btn-skip" id="btn-skip">Non lo so</button>
+<button class="btn btn-skip" id="btn-skip">Passa</button>
 <button class="btn btn-ok" id="btn-ok">Conferma</button>
 </div>
 </div></div>
@@ -288,9 +297,7 @@ Dopo un errore l’app mostra lo stesso calcolo scritto in un altro modo. Si pu�
 <p class="settings-info"><strong>Minuti</strong><br>
 Dopo questi minuti l’app chiede se continuare o fermarsi. Si può sempre uscire con «Per oggi basta».</p>
 <p class="settings-info"><strong>Tasti in basso</strong><br>
-Reset livello = solo il raggiunto. Reset report = solo lo storico. Reset tutto = solo dati V1. Il profilo V2 ha un reset dedicato in Area tutor.</p>
-<p class="settings-info"><strong>V2 adattiva</strong><br>
-Le domande partono da addizioni e sottrazioni. L’app tiene traccia di cosa è stabile e cosa va ripassato. Il ragazzo vede solo la domanda. I dettagli stanno in Area tutor.</p>
+Reset livello = solo il raggiunto. Reset report = solo lo storico. Reset tutto = nome, livello e report V1.</p>
 </div><p class="settings-info" id="scale-info"></p>
 <div class="level-set">
 <div class="gauges">
@@ -310,39 +317,31 @@ Le domande partono da addizioni e sottrazioni. L’app tiene traccia di cosa è 
 <div class="row"><button class="btn" id="btn-save">Salva</button></div>
 <div class="row"><button class="btn btn-soft" id="btn-reset-level">Reset livello</button><button class="btn btn-soft" id="btn-reset-hist">Reset report</button></div>
 <div class="row"><button class="btn btn-danger" id="btn-reset-all">Reset tutto</button></div>
-
-</div>
-
-
-<button type="button" class="lock-btn off" id="btn-devmode">Modalità sviluppatore · tocca per aprire</button>
+<button type="button" class="lock-btn off" id="btn-devmode">Modalità sviluppatore</button>
 <div class="dev-panel hidden" id="dev-panel">
-<p class="settings-info"><strong>Modalità sviluppatore</strong><br>
-Qui si accendono i pacchetti extra. A modalità chiusa il ragazzo fa solo addizioni e sottrazioni. Salva dopo aver cambiato.</p>
+<p class="settings-info">Pacchetti extra. Da spento: solo addizioni e sottrazioni. Poi Salva.</p>
 <div id="dev-packs"></div>
-<div class="row" style="margin-top:8px">
-<button type="button" class="btn btn-soft" id="btn-packs-all">Tutti i pacchetti</button>
-<button type="button" class="btn btn-ghost" id="btn-packs-core">Solo add/sub</button>
+<div class="row">
+<button type="button" class="btn btn-soft" id="btn-packs-all">Tutti</button>
+<button type="button" class="btn btn-ghost" id="btn-packs-core">Solo + −</button>
 </div>
-</div>
-<div class="tutor-box hidden" id="tutor-box">
-<h3>Area tutor V2</h3>
-<p class="settings-info" style="background:#111113;color:#c7c7cc">Il ragazzo non usa questa sezione. Qui si vede come il motore sta scegliendo le domande.</p>
-<pre class="tutor-live" id="tutor-live">Nessuna domanda attiva.</pre>
+<div class="tutor-box" id="tutor-box">
+<p class="settings-info" id="tutor-live">Nessuna domanda attiva.</p>
 <div id="tutor-skills"></div>
-<div class="tutor-actions">
-<button type="button" class="btn btn-soft" id="btn-force-easy">Forza facile</button>
-<button type="button" class="btn btn-soft" id="btn-force-review">Forza ripasso</button>
-<button type="button" class="btn btn-soft" id="btn-force-new">Forza nuova</button>
-<button type="button" class="btn btn-ghost" id="btn-force-off">Forzatura off</button>
-<button type="button" class="btn btn-soft" id="btn-reset-skill">Reset competenza</button>
-<button type="button" class="btn btn-danger" id="btn-reset-v2">Reset profilo V2</button>
-<button type="button" class="btn btn-soft" id="btn-show-json">Vedi JSON</button>
-<button type="button" class="btn btn-soft" id="btn-export-v2">Esporta</button>
-<button type="button" class="btn btn-soft" id="btn-import-v2">Importa</button>
-<button type="button" class="btn" id="btn-selftest">Test motore</button>
-</div>
+<div class="row"><button type="button" class="btn btn-soft" id="btn-force-easy">Forza facile</button></div>
+<div class="row"><button type="button" class="btn btn-soft" id="btn-force-review">Forza ripasso</button></div>
+<div class="row"><button type="button" class="btn btn-soft" id="btn-force-new">Forza nuova</button></div>
+<div class="row"><button type="button" class="btn btn-ghost" id="btn-force-off">Forzatura off</button></div>
+<div class="row"><button type="button" class="btn btn-soft" id="btn-reset-skill">Reset competenza</button></div>
+<div class="row"><button type="button" class="btn btn-danger" id="btn-reset-v2">Reset profilo V2</button></div>
+<div class="row"><button type="button" class="btn btn-soft" id="btn-show-json">Vedi JSON</button></div>
+<div class="row"><button type="button" class="btn btn-soft" id="btn-export-v2">Esporta</button></div>
+<div class="row"><button type="button" class="btn btn-soft" id="btn-import-v2">Importa</button></div>
+<div class="row"><button type="button" class="btn" id="btn-selftest">Test motore</button></div>
 <textarea id="tutor-json" placeholder="JSON profilo V2"></textarea>
 <pre class="tutor-test-out" id="tutor-test-out"></pre>
+</div>
+</div>
 </div>
 <div class="modal hidden" id="modal">
 <div class="modal-box">
