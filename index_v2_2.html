@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="it"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Allenamento Matematica</title>
+<style>
+:root{--bg:#f0f2f8;--card:#fff;--text:#1c1c1e;--accent:#5e5ce6;--ok:#34c759;--warn:#ff9f0a;--err:#ff3b30;--muted:#8e8e93}
+body.bg-ok{background:#e8f8ef}body.bg-warn{background:#fff6e5}body.bg-err{background:#ffebe9}
+.card.border-ok{border-color:var(--ok);background:#f0fdf4;box-shadow:0 0 0 3px rgba(52,199,89,.18)}
+.card.border-warn{border-color:var(--warn);background:#fffbeb;box-shadow:0 0 0 3px rgba(255,159,10,.18)}
+.card.border-err{border-color:var(--err);background:#fef2f2;box-shadow:0 0 0 3px rgba(255,59,48,.2)}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;touch-action:manipulation}
+input,textarea{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default;touch-action:manipulation}
+html,body{height:100%;width:100%;overflow:hidden;overscroll-behavior:none}
+.settings{-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Arial,sans-serif;background:#111113;color:var(--text);display:flex;justify-content:center;position:fixed;top:0;right:0;bottom:0;left:0;inset:0;padding:0;transition:background .35s;overscroll-behavior:none}
+.card{width:100%;max-width:430px;height:100vh;height:100dvh;background:#fff;display:flex;flex-direction:column;overflow:hidden;border-radius:0;border:none;box-shadow:none}
+.card>div:not(.hidden){flex:1;display:flex;flex-direction:column;min-height:0}
+.hidden{display:none!important}
+.btn{font-size:1rem;font-weight:700;height:46px;border:none;border-radius:14px;width:100%;color:#fff;background:var(--accent);display:flex;align-items:center;justify-content:center}
+.btn:active{transform:scale(.97)}.btn:disabled{opacity:.4}
+.btn-start{background:linear-gradient(145deg,#7c7aff,#5e5ce6)}
+.btn-ghost{background:#ececf0;color:#3a3a3c;position:relative;overflow:hidden}
+.btn-ghost.pressing::after{content:"";position:absolute;inset:0 auto 0 0;width:0;background:rgba(94,92,230,.35);animation:fill .9s linear forwards}
+@keyframes fill{to{width:100%}}
+.btn-soft{background:#636366}.btn-danger{background:#ff3b30}
+.btn-exit{background:#ececf0;color:#3a3a3c;height:30px;padding:0 11px;border-radius:99px;font-size:.75rem;width:auto}
+.menu,.end-screen{justify-content:center;align-items:center;gap:12px;text-align:center;padding:28px 22px}
+.menu-icon{width:76px;height:76px;border-radius:22px;background:linear-gradient(145deg,#7c7aff,#5e5ce6);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 24px rgba(94,92,230,.38)}
+h1{font-size:1.28rem;font-weight:800}h2{font-size:1.1rem;font-weight:800;text-align:center}
+.coach,.menu-hint,.mail-note{font-size:.86rem;color:var(--muted);line-height:1.4}
+.menu-actions{display:flex;flex-direction:column;gap:8px;width:100%;max-width:240px}
+.ex-wrap{min-height:0;position:relative}
+.pane-top{margin:10px 10px 0;padding:10px 12px 8px;border-radius:16px;background:transparent;color:var(--text);display:flex;flex-direction:column;min-height:32%}
+.pane-bot{flex:1;min-height:0;background:#1c1c1e;padding:12px 14px 16px;display:flex;border-radius:18px 18px 0 0}
+.top{display:flex;justify-content:flex-end;align-items:center}
+.level-wrap{flex:1}.level-label{font-size:.68rem;font-weight:600;color:var(--muted)}
+.level-bar{height:6px;background:#e5e5ea;border-radius:99px;overflow:hidden}
+.level-fill{height:100%;width:0;background:linear-gradient(90deg,#7c7aff,#5e5ce6);transition:width .35s}
+.question-box{flex:1;display:flex;align-items:center;justify-content:center;padding:8px 8px 28px;position:relative}
+.question{font-size:1.55rem;font-weight:800;text-align:center;line-height:1.25;color:#111}
+.fb{position:absolute;left:12px;right:12px;bottom:8px;text-align:center;font-size:.86rem;font-weight:700;min-height:22px}
+.fb-ok{color:#1a7f37}.fb-warn{color:#9a6700}.fb-err{color:#c92c22}
+.fb-sub{display:block;font-size:.76rem;font-weight:600;opacity:.9;margin-top:2px}
+.input-zone{display:flex;flex-direction:column;align-items:stretch;gap:8px;width:100%;flex:1;min-height:0}
+.ans-show{height:46px;border:2px solid #3a3a3c;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:700;background:#2c2c2e;color:#fff;flex-shrink:0}
+.ans-show.empty{color:#8e8e93;font-weight:600}
+.pad{flex:1;min-height:0;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(4,1fr);gap:8px}
+.pad button{border:none;border-radius:14px;background:#2c2c2e;color:#fff;font-size:1.25rem;font-weight:700;min-height:44px}
+.pad button:active{transform:scale(.96);background:#3a3a3c}
+.checkpoint{position:absolute;top:0;right:0;bottom:0;left:0;inset:0;background:#fff;z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:28px 22px;text-align:center}
+.checkpoint-text{font-size:.95rem;font-weight:600;color:#3a3a3c;line-height:1.4}
+.checkpoint-actions{display:flex;flex-direction:column;gap:8px;width:100%;max-width:240px}
+.summary{font-size:.88rem;line-height:1.5;background:#f2f2f7;padding:12px;border-radius:14px;text-align:left;width:100%}
+.settings{justify-content:flex-start;padding:16px 16px 24px;overflow-y:auto;gap:8px}
+.settings-info{font-size:.72rem;line-height:1.4;color:var(--muted);background:#f2f2f7;border-radius:12px;padding:8px 10px}
+.settings-info strong{color:#3a3a3c}
+.settings label{font-size:.68rem;font-weight:600;color:var(--muted);display:block;margin-bottom:3px;text-transform:uppercase}
+.settings input[type=text],.settings input[type=email]{font-size:.9rem;width:100%;padding:9px 12px;border:2px solid #d1d1d6;border-radius:12px;background:#f9f9fb}
+.settings input[type=range]{width:100%;accent-color:#5e5ce6}
+.level-set{background:#f2f2f7;border-radius:14px;padding:10px}
+.level-set-head{display:flex;justify-content:space-between;align-items:center;font-size:.78rem;font-weight:700;margin:8px 0 4px}.settings-info{margin:0}
+.chk{display:flex;align-items:center;gap:8px;font-size:.78rem;font-weight:600;color:#3a3a3c;margin-top:8px;text-transform:none}
+.chk input{width:16px;height:16px;accent-color:#5e5ce6}
+.gauges{display:flex;gap:8px;margin-bottom:8px}.gauge{flex:1;text-align:center}
+.gauge svg{width:96px;height:54px;display:block;margin:0 auto}
+.g-lab{font-size:.62rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin-top:2px}
+.g-val{font-size:.82rem;font-weight:800}
+.g-hint{font-size:.62rem;font-weight:600;color:var(--muted);margin-top:4px;text-transform:none}
+.settings .row{display:flex;gap:8px}.settings .row .btn{flex:1;height:40px;font-size:.85rem}
+
+
+.ex-wrap{flex:1;min-height:0}.card:has(#screen-ex:not(.hidden)),.card.is-ex{border-radius:18px 18px 0 0}
+.pane-top{flex:1 1 48%;min-height:0;margin:0;padding:12px 14px 8px;border-radius:0;background:#fff;border:none;color:#1c1c1e;display:flex;flex-direction:column}
+.pane-top .level-label{color:#8e8e93}
+.pane-top .level-bar{background:#ececf0}
+.pane-top .level-fill{background:linear-gradient(90deg,#7c7aff,#5e5ce6)}
+.pane-top .btn-exit{background:#5e5ce6;color:#fff;border:none;height:34px;padding:0 12px;font-weight:700}
+.pane-top .question{color:#111}
+.pane-top .fb-ok{color:#1a7f37}.pane-top .fb-warn{color:#9a6700}.pane-top .fb-err{color:#c92c22}
+.pane-top.tone-ok{background:#f0fdf4;border-color:#34c759}
+.pane-top.tone-warn{background:#fffbeb;border-color:#ff9f0a}
+.pane-top.tone-err{background:#fef2f2;border-color:#ff3b30}
+.pane-bot{flex:0 0 50%;height:50%;min-height:50%;width:100%;margin:0;padding:8px 8px calc(8px + env(safe-area-inset-bottom));background:#111113;border-radius:0;display:flex}
+.input-zone{gap:8px}
+.ans-show{background:#1c1c1e;border-color:#3a3a3c;color:#fff}
+.pad{gap:7px}
+.pad button{background:#2c2c2e;color:#f2f2f7;border-radius:16px}
+.pad-actions{display:flex;gap:8px;flex-shrink:0;height:52px}
+.btn-skip{flex:0 0 34%;background:#ff9f0a;color:#fff;height:52px;font-size:.9rem}
+.btn-ok{flex:1;background:#34c759;color:#fff;height:52px;font-size:1.05rem}
+
+
+.modal{position:absolute;top:0;right:0;bottom:0;left:0;inset:0;background:rgba(28,28,30,.45);display:flex;align-items:center;justify-content:center;z-index:20;padding:22px}
+.modal.hidden{display:none!important}
+.modal-box{background:#fff;border-radius:18px;padding:18px 16px;width:100%;max-width:300px;box-shadow:0 12px 40px rgba(0,0,0,.18)}
+.modal-box p{font-size:.92rem;font-weight:600;color:#1c1c1e;line-height:1.4;margin-bottom:14px;text-align:center}
+.modal-actions{display:flex;gap:8px}
+.modal-actions .btn{height:42px;font-size:.9rem}
+
+.set-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px}
+.set-head h2{margin:0;text-align:left}
+.link-help{border:none;background:none;color:#5e5ce6;font-weight:700;font-size:.82rem;padding:4px 0}
+.scale-table{width:100%;border-collapse:collapse;font-size:.72rem}
+.scale-table td{padding:2px 0;vertical-align:baseline}
+.scale-table td.n{width:36px;font-weight:800;color:#1c1c1e;white-space:nowrap}
+.scale-table td.l{font-weight:700;padding-right:8px;white-space:nowrap}
+.scale-table td.d{color:#8e8e93}
+.settings{padding:10px 12px 16px;gap:6px}
+.settings input[type=text],.settings input[type=email]{padding:7px 10px}
+.settings .row .btn{height:36px}
+.gauge svg{width:72px;height:42px}
+.g-hint{display:none}
+
+body,.card{background:#111113}
+.menu,.end-screen,.settings{background:#111113;color:#f2f2f7}
+.menu h1,.end-screen h2,.settings h2,.set-head h2{color:#fff}
+.coach,.menu-hint,.mail-note,.settings label,.g-lab,.g-val,.level-set-head,.chk{color:#d1d1d6}
+.settings-info{background:#1c1c1e;color:#c7c7cc}
+.settings-info strong{color:#fff}
+.level-set{background:#1c1c1e}
+.settings input[type=text],.settings input[type=email]{background:#2c2c2e;border-color:#3a3a3c;color:#fff}
+.btn-ghost{background:#2c2c2e;color:#fff}
+.link-help{color:#a5a4ff}
+.scale-table td.n,.scale-table td.l{color:#fff}
+.scale-table td.d{color:#8e8e93}
+.modal-box{background:#1c1c1e}
+.modal-box p{color:#fff}
+.summary{background:#1c1c1e;color:#f2f2f7}
+.pane-top{
+  flex:1 1 48%;min-height:0;margin:10px;padding:12px 14px;
+  border-radius:18px;background:#f7f7fa;color:#1c1c1e;
+  border:3px solid #3a3a3c;display:flex;flex-direction:column;
+}
+.pane-top .question{color:#111}
+.pane-top .level-label{color:#636366}
+.pane-top .btn-exit{background:#5e5ce6;color:#fff}
+.pane-top.tone-ok{background:#e8f8ef;border-color:#34c759;border-width:4px}
+.pane-top.tone-warn{background:#fff6e5;border-color:#ff9f0a;border-width:4px}
+.pane-top.tone-err{background:#ffebe9;border-color:#ff3b30;border-width:4px}
+.pane-bot{flex:0 0 50%;height:50%;background:#111113;margin:0;padding:8px 8px calc(8px + env(safe-area-inset-bottom));border-radius:0}
+.lock-btn{width:100%;height:40px;border:none;border-radius:12px;font-weight:800;font-size:.82rem;margin-top:8px}
+.lock-btn.off{background:#2c2c2e;color:#d1d1d6}
+.lock-btn.on{background:#34c759;color:#fff}
+
+.menu,.end-screen,.settings{background:#f4f4f8;color:#1c1c1e}
+.menu h1,.end-screen h2,.settings h2,.set-head h2{color:#1c1c1e}
+.coach,.mail-note,.settings label{color:#8e8e93}
+.settings-info{background:#fff;color:#3a3a3c}
+.settings-info strong{color:#1c1c1e}
+.level-set{background:#fff}
+.settings input[type=text],.settings input[type=email]{background:#fff;border-color:#d1d1d6;color:#1c1c1e}
+.btn-ghost{background:#ececf0;color:#1c1c1e}
+.link-help{color:#5e5ce6}
+.scale-table td.n,.scale-table td.l{color:#1c1c1e}
+.scale-table td.d{color:#8e8e93}
+.modal-box{background:#fff}
+.modal-box p{color:#1c1c1e}
+.summary{background:#fff;color:#1c1c1e}
+.bars{display:flex;flex-direction:column;gap:5px;flex:1;margin-right:8px}
+.bar-row{display:flex;align-items:center;gap:8px}
+.bar-row span{font-size:.62rem;font-weight:700;color:#636366;width:52px;flex-shrink:0}
+.bar-track{flex:1;height:6px;background:#e5e5ea;border-radius:99px;overflow:hidden}
+.bar-fill{height:100%;width:0;border-radius:99px;transition:width .35s}
+.bar-fill.lvl{background:#5e5ce6}
+.bar-fill.pct{background:#34c759}
+
+.x-close{width:36px;height:36px;border:none;border-radius:18px;background:#ececf0;color:#1c1c1e;font-size:1.4rem;font-weight:700;line-height:1}
+.settings{padding:8px 12px 12px;gap:5px}
+.settings .row .btn{height:34px;font-size:.8rem}
+.settings input[type=text],.settings input[type=email]{padding:6px 10px;font-size:.86rem}
+.gauge svg{width:64px;height:38px}
+
+@keyframes pop{0%{transform:scale(.92);opacity:0}60%{transform:scale(1.03);opacity:1}100%{transform:scale(1);opacity:1}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes bounceWin{0%{transform:scale(1)}30%{transform:scale(1.07)}55%{transform:scale(.97)}78%{transform:scale(1.02)}100%{transform:scale(1)}}
+@keyframes bounceTxt{0%{transform:scale(.4);opacity:0}35%{transform:scale(1.18);opacity:1}55%{transform:scale(.92)}75%{transform:scale(1.06)}100%{transform:scale(1);opacity:1}}
+@keyframes pulseOk{0%{box-shadow:0 0 0 0 rgba(52,199,89,.45)}100%{box-shadow:0 0 0 14px rgba(52,199,89,0)}}
+@keyframes pulseWarn{0%{box-shadow:0 0 0 0 rgba(255,159,10,.4)}100%{box-shadow:0 0 0 12px rgba(255,159,10,0)}}
+@keyframes pulseErr{0%{box-shadow:0 0 0 0 rgba(255,59,48,.4)}100%{box-shadow:0 0 0 12px rgba(255,59,48,0)}}
+@keyframes joy1{0%{transform:translateY(12px);opacity:0}55%{transform:translateY(-3px);opacity:1}100%{transform:translateY(0);opacity:1}}
+@keyframes joy2{0%{transform:scale(.7);opacity:0}50%{transform:scale(1.08);opacity:1}100%{transform:scale(1);opacity:1}}
+@keyframes joy3{0%{letter-spacing:.4px;opacity:0}100%{letter-spacing:0;opacity:1}}
+@keyframes joy4{0%{transform:translateY(8px) scale(.96);opacity:0}100%{transform:none;opacity:1}}
+@keyframes shakeSoft{0%,100%{transform:translateX(0)}25%{transform:translateX(-3px)}50%{transform:translateX(3px)}75%{transform:translateX(-2px)}}
+@keyframes shakeHard{0%,100%{transform:translateX(0)}12%{transform:translateX(-10px)}24%{transform:translateX(10px)}36%{transform:translateX(-8px)}48%{transform:translateX(8px)}60%{transform:translateX(-5px)}76%{transform:translateX(4px)}}
+.anim-pop{animation:pop .32s cubic-bezier(.22,1,.36,1)}
+.anim-celeb{animation:bounceWin .55s cubic-bezier(.22,1,.36,1)}
+.end-screen{animation:fadeUp .38s cubic-bezier(.22,1,.36,1)}
+.end-screen h2{color:#1a7f37}
+.fb-anim-joy1,.fb-anim-joy2,.fb-anim-joy3,.fb-anim-joy4{animation:bounceTxt .55s cubic-bezier(.22,1,.36,1);transform-origin:center}
+.fb-anim-joy2{animation:joy2 .45s cubic-bezier(.22,1,.36,1)}
+.fb-anim-joy3{animation:joy3 .4s ease-out}
+.fb-anim-joy4{animation:joy4 .4s cubic-bezier(.22,1,.36,1)}
+.fb-anim-sad1,.fb-anim-sad2,.fb-anim-sad3{animation:shakeSoft .38s ease-out}
+.fb-anim-err{animation:shakeHard .5s ease-out}
+.pane-top{transition:background .35s cubic-bezier(.22,1,.36,1),border-color .35s cubic-bezier(.22,1,.36,1),box-shadow .35s}
+.pane-top.tone-ok{animation:pulseOk .55s ease-out}
+.pane-top.tone-warn{animation:pulseWarn .5s ease-out,shakeSoft .38s ease-out}
+.pane-top.tone-err{animation:pulseErr .5s ease-out,shakeHard .5s ease-out}
+.pad button{transition:transform .08s,background .12s}
+.btn,.btn-ok,.btn-skip,.btn-exit{transition:transform .12s,opacity .15s,filter .15s}
+.menu-icon{transition:transform .25s}
+.menu-icon:active{transform:scale(.96)}
+.coach,.menu-hint{color:#3a3a3c}
+.menu-hint{font-size:.78rem;font-weight:500}
+.mail-note{color:#636366}
+.settings label{color:#636366}
+.scale-table td.d{color:#636366}
+.lock-btn.off{background:#3a3a3c;color:#fff}
+.pane-top{background:#fafafa;border:3px solid #2c2c2e}
+.pane-top .question{color:#000}
+.fb-ok{color:#0d7a32}.fb-warn{color:#8a5a00}.fb-err{color:#b42318}
+.modal-actions{flex-wrap:wrap}
+.modal-actions .btn{flex:1;min-width:28%;font-size:.78rem;padding:0 6px}
+
+
+.tutor-box{margin-top:8px;background:#1c1c1e;color:#f2f2f7;border-radius:12px;padding:8px 10px}
+.tutor-box h3{font-size:.78rem;margin:0 0 6px;color:#fff}
+.tutor-live,.tutor-test-out,#tutor-json{width:100%;font-family:ui-monospace,Menlo,monospace;font-size:.62rem;line-height:1.35;white-space:pre-wrap;background:#111113;color:#e8e8ed;border-radius:8px;padding:8px;border:1px solid #3a3a3c}
+#tutor-json{min-height:90px}
+.tutor-row{font-size:.68rem;color:#d1d1d6;padding:2px 0;border-bottom:1px solid #2c2c2e}
+.tutor-actions{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.tutor-actions .btn{height:32px;font-size:.72rem;width:auto;flex:1 1 30%;padding:0 8px}
+
+.settings{overflow-y:auto;-webkit-overflow-scrolling:touch}
+.dev-panel{margin-top:8px;padding-bottom:24px}
+.dev-panel .row{margin-top:6px}
+.dev-panel .btn{height:40px;font-size:.85rem}
+#dev-packs{margin:6px 0}
+.chk{display:flex;align-items:center;gap:8px;font-size:.8rem;font-weight:600;color:#3a3a3c;margin-top:6px;text-transform:none}
+.chk input{width:18px;height:18px;accent-color:#5e5ce6;flex-shrink:0}
+.tutor-box{margin-top:8px}
+#tutor-live{white-space:pre-wrap;font-size:.72rem;line-height:1.35}
+#tutor-json{width:100%;min-height:88px;margin-top:8px;padding:8px;border-radius:12px;border:2px solid #d1d1d6;font-size:.72rem}
+.tutor-test-out{font-size:.68rem;white-space:pre-wrap;margin-top:6px}
+.tutor-row{font-size:.72rem;padding:3px 0;border-bottom:1px solid #e5e5ea}
+
+.dev-screen{overflow-y:auto;-webkit-overflow-scrolling:touch;background:#f2f2f7;color:#1c1c1e;padding:12px}
+.dev-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.dev-head h2{margin:0;text-align:left;font-size:1.1rem}
+.dev-sub{font-size:.72rem;color:#636366;line-height:1.35;margin:2px 0 10px}
+.dev-nav{display:flex;gap:6px;overflow-x:auto;margin:0 -2px 10px;padding-bottom:3px}
+.dev-nav button{white-space:nowrap;border:0;border-radius:999px;padding:7px 10px;background:#e5e5ea;color:#3a3a3c;font-size:.72rem;font-weight:700}
+.dev-nav button.active{background:#1c1c1e;color:#fff}
+.dev-summary{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}.dev-status{padding:10px 12px;border-radius:12px;background:#fff;border:1px solid #d1d1d6}.dev-status strong{display:block;font-size:.82rem}.dev-status span{display:block;font-size:.72rem;color:#636366;margin-top:3px;line-height:1.3}.dev-callout{padding:12px;border-radius:12px;background:#fff;border:1px solid #d1d1d6;margin-top:8px}.dev-callout h3{margin:0 0 5px;font-size:.86rem}.dev-callout p{margin:0;font-size:.75rem;line-height:1.4;color:#3a3a3c}.dev-action-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}.dev-action{border:1px solid #d1d1d6;background:#fff;border-radius:11px;padding:9px;text-align:left}.dev-action strong{display:block;font-size:.76rem}.dev-action small{display:block;color:#636366;font-size:.66rem;line-height:1.3;margin-top:3px}.dev-section-note{font-size:.72rem;color:#636366;line-height:1.4;margin:4px 0 9px}.plan-bar{height:8px;border-radius:99px;background:#e5e5ea;overflow:hidden;margin-top:7px}.plan-bar i{display:block;height:100%;background:#1c1c1e;border-radius:99px}.assessment-banner{margin:8px 0;padding:10px 12px;border-radius:12px;background:#fff;border:1px solid #d1d1d6}.assessment-banner strong{font-size:.78rem}.assessment-banner p{font-size:.7rem;color:#636366;line-height:1.35;margin:3px 0 0}.dev-table th{white-space:nowrap}
+
+.dev-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-bottom:10px}
+.dev-card{background:#fff;border-radius:12px;padding:9px;border:1px solid #e5e5ea}
+.dev-card h3{font-size:.72rem;margin:0 0 6px}
+.dev-kpi{font-size:1.15rem;font-weight:800}
+.dev-small{font-size:.64rem;color:#636366;line-height:1.35}
+.dev-table{width:100%;border-collapse:collapse;font-size:.63rem}
+.dev-table th,.dev-table td{text-align:left;padding:5px 4px;border-bottom:1px solid #e5e5ea;vertical-align:top}
+.dev-table th{font-weight:800}
+.dev-scroll{overflow:auto;max-height:330px}
+.dev-legend{font-size:.68rem;line-height:1.45}
+.dev-legend dt{font-weight:800;margin-top:7px}
+.dev-legend dd{margin:2px 0 0 0;color:#3a3a3c}
+.dev-danger{color:#b42318}
+.hint-method{display:block;font-size:.84rem;line-height:1.45;margin-top:4px}
+.hint-step{display:block;font-size:.78rem;line-height:1.4;margin-top:4px}
+.fb .fb-sub{white-space:pre-line}
+@media(min-width:700px){.dev-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.dev-screen{padding:18px}}
+</style></head>
+<body>
+<div class="card" id="card">
+<div id="screen-menu" class="menu">
+<div class="menu-icon" aria-hidden="true"><svg viewBox="0 0 64 64" width="42" height="42"><text x="32" y="46" text-anchor="middle" font-size="40" font-weight="800" fill="#fff" font-family="Georgia, serif">&#931;</text></svg></div>
+<h1>Allenamento Matematica</h1>
+<p class="coach" id="coach-text">Ciao! Pronto a giocare?</p>
+<div class="menu-actions">
+<button class="btn btn-start" id="btn-start">Inizia</button>
+<button class="btn btn-ghost" id="btn-settings">Impostazioni</button>
+</div>
+<p class="menu-hint" id="menu-hint">Puoi fermarti quando vuoi con «Per oggi basta»: ogni 2 minuti te lo chiederò anch’io.</p>
+</div>
+<div id="screen-ex" class="ex-wrap hidden">
+<div class="pane-top">
+<div class="top">
+<button class="btn-exit" id="btn-enough">Per oggi basta</button>
+</div>
+<div class="question-box" id="qbox"><div class="question anim-pop" id="qtext"></div>
+<div id="fb" class="fb hidden"></div></div>
+</div>
+<div class="pane-bot"><div class="input-zone">
+<div class="ans-show empty" id="ans">Risposta</div>
+<div class="pad" id="pad">
+<button type="button" data-k="1">1</button><button type="button" data-k="2">2</button><button type="button" data-k="3">3</button>
+<button type="button" data-k="4">4</button><button type="button" data-k="5">5</button><button type="button" data-k="6">6</button>
+<button type="button" data-k="7">7</button><button type="button" data-k="8">8</button><button type="button" data-k="9">9</button>
+<button type="button" data-k=":">:</button><button type="button" data-k="0">0</button><button type="button" data-k="del">⌫</button>
+</div>
+<div class="pad-actions">
+<button class="btn btn-skip" id="btn-skip">Passa</button>
+<button class="btn btn-ok" id="btn-ok">Conferma</button>
+</div>
+</div></div>
+<div class="checkpoint hidden" id="checkpoint">
+<p class="checkpoint-text" id="cp-text">Continuiamo o ci fermiamo?</p>
+<div class="checkpoint-actions">
+<button class="btn" id="cp-continue">Continua</button>
+<button class="btn btn-soft" id="cp-stop">Per oggi basta</button>
+</div></div></div>
+<div id="screen-end" class="end-screen hidden">
+<h2 id="end-title">Sessione chiusa</h2>
+<div class="summary" id="sum"></div>
+<p class="mail-note" id="mail-note"></p>
+<button class="btn btn-soft" id="btn-home">Torna allinizio</button>
+</div>
+<div id="screen-set" class="settings hidden">
+<div class="set-head"><h2>Impostazioni</h2><div><button type="button" class="link-help" id="help-toggle">Come funziona</button> <button type="button" class="x-close" id="btn-set-back" aria-label="Chiudi">×</button></div></div>
+<div id="help-box" class="hidden">
+<p class="settings-info"><strong>Che cos’è</strong><br>
+App di allenamento al calcolo. Il ragazzo risponde alle domande. Il tutor decide fin dove può arrivare la difficoltà.</p>
+<p class="settings-info"><strong>Tetto (livello massimo)</strong><br>
+Numero da 0 a 10. 0 = solo addizioni piccole. 10 = mix da adulto (soldi, percentuali, orologio). Le domande non superano questo valore.</p>
+<p class="settings-info"><strong>Raggiunto</strong><br>
+Punto a cui è arrivato finora. All’inizio di una sessione riparte da qui, non da zero. Solo «Reset livello» lo azzera.</p>
+<p class="settings-info"><strong>Come sale e scende</strong><br>
+Risposta giusta al primo tentativo: sale di 1, fino al tetto.<br>
+Risposta sbagliata o «Passa»: scende di 1, fino a 0.<br>
+Dopo un errore l’app mostra lo stesso calcolo scritto in un altro modo. Si può riscrivere il numero senza cancellare.</p>
+<p class="settings-info"><strong>Minuti</strong><br>
+Dopo questi minuti l’app chiede se continuare o fermarsi. Si può sempre uscire con «Per oggi basta».</p>
+<p class="settings-info"><strong>Tasti in basso</strong><br>
+Reset livello = solo il raggiunto. Reset report = solo lo storico. Reset tutto = nome, livello e report V1.</p>
+</div><p class="settings-info" id="scale-info"></p>
+<div class="level-set">
+<div class="gauges">
+<div class="gauge"><svg viewBox="0 0 100 58" id="g-now"></svg><div class="g-lab">Raggiunto</div><div class="g-val" id="g-now-val">0</div><div class="g-hint">Lancetta chiara = già fatto</div></div>
+<div class="gauge"><svg viewBox="0 0 100 58" id="g-cap"></svg><div class="g-lab">Tetto</div><div class="g-val" id="g-cap-val">10</div><div class="g-hint">Fino a qui si può salire</div></div>
+</div>
+<div class="level-set-head"><span>Livello massimo</span><span id="set-cap-num">10/10</span></div>
+<input type="range" id="set-cap" min="0" max="10" step="1" value="10">
+<p class="settings-info" id="set-level-desc" style="margin:6px 0 0;padding:0;background:transparent"></p>
+<button type="button" class="lock-btn off" id="set-lock">Tetto aperto · tocca per bloccare</button>
+<div class="level-set-head" style="margin-top:8px"><span>Ogni quanti minuti chiedere</span><span id="set-mins-num">2 min</span></div>
+<input type="range" id="set-mins" min="1" max="10" step="1" value="2">
+</div>
+<div><label>Nome</label><input type="text" id="set-name" placeholder="Nome del ragazzo"></div>
+<div><label>Nome tutor</label><input type="text" id="set-tutor-name" placeholder="Nome tutor"></div>
+<div><label>Email tutor</label><input type="email" id="set-email" placeholder="tutor@email.com"></div>
+<div class="row"><button class="btn" id="btn-save">Salva</button></div>
+<div class="row"><button class="btn btn-soft" id="btn-reset-level">Reset livello</button><button class="btn btn-soft" id="btn-reset-hist">Reset report</button></div>
+<div class="row"><button class="btn btn-danger" id="btn-reset-all">Reset tutto</button></div>
+<button type="button" class="btn btn-ghost" id="btn-open-dev">Apri Area Tutor</button>
+<p class="settings-info" style="margin-top:6px">L’Area Tutor è separata dalle impostazioni del ragazzo: qui trovi il quadro dell’apprendimento, il programma automatico, lo storico e gli strumenti tecnici.</p></div>
+</div>
+<div id="screen-dev" class="dev-screen hidden">
+  <div class="dev-head">
+    <div><h2>Area Tutor</h2><p class="dev-sub">Qui non devi interpretare numeri tecnici uno per uno. La prima schermata ti dice cosa sta andando bene, dove intervenire e cosa farà il programma successivo.</p></div>
+    <button type="button" class="x-close" id="btn-dev-back" aria-label="Chiudi">×</button>
+  </div>
+  <div class="dev-nav">
+    <button type="button" class="active" data-devtab="overview">Situazione</button>
+    <button type="button" data-devtab="skills">Competenze</button>
+    <button type="button" data-devtab="micros">Dove intervenire</button>
+    <button type="button" data-devtab="history">Storico</button>
+    <button type="button" data-devtab="tools">Strumenti</button>
+    <button type="button" data-devtab="legend">Come leggere</button>
+  </div>
+
+  <section id="devtab-overview">
+    <div id="dev-assessment-banner" class="assessment-banner"></div>
+    <div class="dev-summary">
+      <div class="dev-status"><strong id="dev-program-title">Programma automatico</strong><span id="dev-program-text">In attesa dei primi dati.</span><div class="plan-bar"><i id="dev-plan-bar" style="width:0%"></i></div></div>
+      <div class="dev-status"><strong id="dev-next-title">Prossimo passo</strong><span id="dev-next-text">Osservazione iniziale.</span></div>
+    </div>
+    <div class="dev-grid">
+      <div class="dev-card"><h3>Prove</h3><div class="dev-kpi" id="dev-kpi-attempts">0</div><div class="dev-small">esercizi osservati</div></div>
+      <div class="dev-card"><h3>Autonomia</h3><div class="dev-kpi" id="dev-kpi-auto">0%</div><div class="dev-small">corrette al primo tentativo</div></div>
+      <div class="dev-card"><h3>Con aiuto</h3><div class="dev-kpi" id="dev-kpi-assisted">0%</div><div class="dev-small">corrette dopo un suggerimento</div></div>
+      <div class="dev-card"><h3>Errori</h3><div class="dev-kpi" id="dev-kpi-wrong">0%</div><div class="dev-small">errate o non date</div></div>
+    </div>
+    <div class="dev-callout"><h3>Indicazione per il tutor</h3><p id="dev-quick-read">Nessun dato sufficiente.</p></div>
+    <div class="dev-callout"><h3>Cosa sta facendo l’app</h3><p id="dev-automation-read">Il motore sta raccogliendo dati senza anticipare giudizi.</p></div>
+  </section>
+
+  <section id="devtab-skills" class="hidden"><div class="dev-card"><h3>Competenze osservate</h3><p class="dev-section-note">Ordinate dalla situazione più fragile alla più solida. Non usare il numero da solo: guarda soprattutto autonomia e numero di prove.</p><div class="dev-scroll"><table class="dev-table"><thead><tr><th>Competenza</th><th>Stato</th><th>Prove</th><th>Auto</th><th>Aiuti</th><th>Errore</th></tr></thead><tbody id="dev-skills-body"></tbody></table></div></div></section>
+
+  <section id="devtab-micros" class="hidden"><div class="dev-card"><h3>Dove intervenire</h3><p class="dev-section-note">Questa è la schermata più importante per costruire il programma: mostra i micro-obiettivi che stanno creando difficoltà o richiedendo troppo aiuto.</p><div id="dev-focus-list"></div><div class="dev-scroll"><table class="dev-table"><thead><tr><th>Micro</th><th>Stato</th><th>Prove</th><th>Auto</th><th>Errore</th><th>Tempo</th></tr></thead><tbody id="dev-micros-body"></tbody></table></div></div></section>
+
+  <section id="devtab-history" class="hidden"><div class="dev-card"><h3>Ultimi esercizi</h3><p class="dev-section-note">Serve per capire perché il motore ha preso una decisione, non per controllare ogni risposta.</p><div class="dev-scroll"><table class="dev-table"><thead><tr><th>Quando</th><th>Competenza</th><th>Micro</th><th>Esito</th><th>Aiuti</th><th>Tempo</th></tr></thead><tbody id="dev-history-body"></tbody></table></div></div></section>
+
+  <section id="devtab-tools" class="hidden">
+    <div class="dev-card"><h3>Strumenti</h3><p class="dev-section-note">Qui ci sono solo comandi di gestione. Le modalità tecniche non vengono confuse con il programma didattico.</p>
+      <div class="dev-action-grid">
+        <button type="button" class="dev-action" id="btn-assessment-now"><strong>Ripeti valutazione iniziale</strong><small>Riporta il motore in modalità esplorazione.</small></button>
+        <button type="button" class="dev-action" id="btn-program-reset"><strong>Ricalcola programma</strong><small>Ricalcola il percorso dai dati già raccolti.</small></button>
+        <button type="button" class="dev-action" id="btn-packs-all"><strong>Attiva tutte le aree</strong><small>Utile per la valutazione iniziale completa.</small></button>
+        <button type="button" class="dev-action" id="btn-packs-core"><strong>Solo calcolo base</strong><small>Addizioni e sottrazioni.</small></button>
+        <button type="button" class="dev-action" id="btn-force-easy"><strong>Forza recupero</strong><small>Solo per una prova controllata.</small></button>
+        <button type="button" class="dev-action" id="btn-force-review"><strong>Forza ripasso</strong><small>Solo per una prova controllata.</small></button>
+        <button type="button" class="dev-action" id="btn-force-new"><strong>Forza nuova</strong><small>Solo per una prova controllata.</small></button>
+        <button type="button" class="dev-action" id="btn-force-off"><strong>Automatica</strong><small>Restituisce il controllo al motore.</small></button>
+      </div>
+      <div class="row"><button type="button" class="btn btn-soft" id="btn-reset-skill">Reset competenza corrente</button><button type="button" class="btn btn-danger" id="btn-reset-v2">Reset profilo V2</button></div>
+      <div class="row"><button type="button" class="btn btn-soft" id="btn-show-json">Vedi dati tecnici</button><button type="button" class="btn btn-soft" id="btn-export-v2">Esporta</button><button type="button" class="btn btn-soft" id="btn-import-v2">Importa</button></div>
+      <div class="row"><button type="button" class="btn" id="btn-selftest">Test motore</button></div>
+      <textarea id="tutor-json" placeholder="Dati tecnici V2"></textarea><pre class="tutor-test-out" id="tutor-test-out"></pre>
+    </div>
+  </section>
+
+  <section id="devtab-legend" class="hidden"><div class="dev-card"><h3>Come leggere</h3><dl class="dev-legend">
+    <dt>Mastery</dt><dd>Stima interna della stabilità osservata. Non è un voto.</dd>
+    <dt>Autonomia</dt><dd>Risposta corretta al primo tentativo senza aiuti. È il dato più importante per l’autonomia.</dd>
+    <dt>Aiuto</dt><dd>Il procedimento è stato sostenuto dal tutor/app. Non va contato come autonomia.</dd>
+    <dt>Micro</dt><dd>Il tipo preciso di difficoltà. È più utile della mastery generale per decidere cosa allenare.</dd>
+    <dt>Tempo</dt><dd>Indica la fluidità. Un tempo alto va confrontato con correttezza e aiuti.</dd>
+    <dt>Programma</dt><dd>Ogni gruppo di risposte il motore rivaluta i dati e sposta il lavoro di un piccolo passo, non di un livello intero.</dd>
+    <dt>Valutazione iniziale</dt><dd>Prima fase esplorativa: tutte le aree disponibili vengono esplorate fino a individuare punti forti, fragili e zone ancora sconosciute. Non è un esame con voto.</dd>
+  </dl></div></section>
+</div>
+<div class="modal hidden" id="modal">
+<div class="modal-box">
+<p id="modal-text"></p>
+<div class="modal-actions" id="modal-actions">
+<button class="btn btn-ghost" id="modal-no">Annulla</button>
+<button class="btn btn-soft" id="modal-stay" style="display:none">Resta qui</button>
+<button class="btn" id="modal-yes">Ok</button>
+</div></div></div>
+</div>
+<script>
+(() => {
+  const MAX_LEVEL=10, MIN_LEVEL=0;
+  const LEVEL_INFO=[
+    {min:0,max:0,label:"Inizio",desc:"Addizioni piccole"},
+    {min:1,max:2,label:"Base",desc:"Addizioni e sottrazioni"},
+    {min:3,max:4,label:"Tempo",desc:"Orologio"},
+    {min:5,max:6,label:"Intermedio",desc:"Moltiplicazioni"},
+    {min:7,max:8,label:"Esperto",desc:"Divisioni"},
+    {min:9,max:9,label:"Ampio",desc:"Numeri più alti"},
+    {min:10,max:10,label:"Adulto",desc:"Mix quotidiano"}
+  ];
+  const levelInfo=lvl=>LEVEL_INFO.find(t=>lvl>=t.min&&lvl<=t.max)||LEVEL_INFO[LEVEL_INFO.length-1];
+  const LS={
+    get:function(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } },
+    set:function(k,v){ try{ localStorage.setItem(k,v); return true; }catch(e){ return false; } }
+  };
+  document.addEventListener("touchstart",function(){},{passive:true});
+  document.addEventListener("contextmenu",function(e){ var t=e.target; if(t&&(t.tagName==="INPUT"||t.tagName==="TEXTAREA")) return; e.preventDefault(); });
+
+  var V2_KEYS={profile:"math_training_v2_profile",history:"math_training_v2_history",skills:"math_training_v2_skills",settings:"math_training_v2_settings"};
+  var V1_KEYS=["m_name","m_tutor_name","m_email","m_cap","m_lock","m_mins","m_reached","m_level","m_hist","m_sigs"];
+  var V2_CFG={
+    mix:{recovery:45,consolidate:25,maintain:20,novel:10},
+    masteryDelta:{autonomous:8,second_try:4,hinted:1,shown:-2,wrong:-5,unknown:-8},
+    srDays:[1,3,7,14,30,60],
+    recentExact:24,recentEquivalent:8,recentMicro:2,
+    minAttemptsAcquired:8,slowSec:12,unlockMastery:60,unlockSoftMastery:40,unlockSoftAttempts:6,maxHistory:400,microTopN:4,microRecentOutcomes:8,programUpdateEvery:8,assessmentMinResponses:24,assessmentMaxResponses:60
+  };
+  var PACKS=["addition","subtraction","multiplication","division","clock","money","daily"];
+  var PACK_LABEL={addition:"Addizioni",subtraction:"Sottrazioni",multiplication:"Moltiplicazioni",division:"Divisioni",clock:"Orologio",money:"Denaro",daily:"Vita quotidiana"};
+  var MASTERY_BANDS=[
+    {max:20,id:"none",label:"non ancora allenata"},
+    {max:40,id:"emerging",label:"in avvio"},
+    {max:60,id:"unstable",label:"ancora instabile"},
+    {max:80,id:"consolidating",label:"in consolidamento"},
+    {max:95,id:"acquired",label:"solida"},
+    {max:100,id:"maintain",label:"da mantenere"}
+  ];
+  function masteryBand(m){ m=clamp(m,0,100); for(var i=0;i<MASTERY_BANDS.length;i++) if(m<=MASTERY_BANDS[i].max) return MASTERY_BANDS[i]; return MASTERY_BANDS[MASTERY_BANDS.length-1]; }
+  function clamp(n,a,b){ n=+n; if(isNaN(n)) n=a; return Math.max(a,Math.min(b,n)); }
+  function nowISO(){ return new Date().toISOString(); }
+  function daysFrom(iso){ if(!iso) return 999; return (Date.now()-new Date(iso).getTime())/864e5; }
+  function addDays(iso,d){ var t=iso?new Date(iso).getTime():Date.now(); return new Date(t+d*864e5).toISOString(); }
+  function v2LoadJSON(key, fb){ try{ var raw=LS.get(key); if(!raw) return fb; return JSON.parse(raw); }catch(e){ return fb; } }
+  function v2SaveJSON(key, val){ try{ return LS.set(key, JSON.stringify(val)); }catch(e){ return false; } }
+  function emptySkillState(){ return {mastery:0,attempts:0,correct:0,wrong:0,autonomousCorrect:0,assistedCorrect:0,hintsUsed:0,consecutiveCorrect:0,consecutiveWrong:0,averageResponseTime:0,lastSeen:null,nextReview:null,reviewInterval:0,srStep:0,lastOutcome:null,workingMax:null,recentWrong:0,sessionsSeen:0,autonomousSessions:0,lastSessionDay:null,recentOutcomes:[],stableStreak:0,lastDifficulty:null,errorPatterns:{}}; }
+  function normalizeState(st){
+    var d=emptySkillState(); st=st&&typeof st==="object"?st:{};
+    Object.keys(d).forEach(function(k){ if(typeof st[k]==="undefined"||st[k]===null) st[k]=d[k]; });
+    if(!Array.isArray(st.recentOutcomes)) st.recentOutcomes=[];
+    if(!st.errorPatterns||typeof st.errorPatterns!=="object") st.errorPatterns={};
+    return st;
+  }
+  function dayKey(iso){ var d=iso?new Date(iso):new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+  function arithmeticMicro(op,a,b,target){
+    var band=target<=5?"0_5":target<=10?"6_10":target<=15?"11_15":target<=20?"16_20":target<=30?"21_30":target<=50?"31_50":"51_plus";
+    if(op==="+"){
+      var ones=(a%10)+(b%10), dist=Math.abs(ones-10), near=dist===0?"0":dist===1?"1":dist===2?"2":"3p";
+      return "+|"+band+"|"+(ones>=10?"carry":"plain")+"|to10_"+near;
+    }
+    var gap=Math.abs((a%10)-(b%10)), g=gap===0?"0":gap===1?"1":gap===2?"2":"3p";
+    return "-|"+band+"|"+((a%10)<(b%10)?"borrow":"plain")+"|gap_"+g;
+  }
+  function emptyProfile(){ return {version:2,createdAt:nowISO(),updatedAt:nowISO(),skills:{},micros:{},lastSkillId:null,recentSigs:[],recentEq:[],recentMicros:[],forceMode:null,assessment:{active:true,completed:false,responses:0,startedAt:nowISO()},program:{version:0,lastUpdate:null,step:1,ceiling:1,focusSkills:[],focusMicros:[],reason:"Valutazione iniziale",nextUpdateAt:V2_CFG.programUpdateEvery}}; }
+  function defaultPacks(){ return {addition:true,subtraction:true,multiplication:false,division:false,clock:false,money:false,daily:false}; }
+  function emptyV2Settings(){ return {name:"",tutorName:"",email:"",cap:MAX_LEVEL,locked:false,mins:2,devMode:false,packs:defaultPacks()}; }
+  var v2Profile=emptyProfile(), v2History=[], v2Settings=emptyV2Settings();
+  function ensureSkillState(id){ if(!v2Profile.skills[id]) v2Profile.skills[id]=emptySkillState(); v2Profile.skills[id]=normalizeState(v2Profile.skills[id]); return v2Profile.skills[id]; }
+  function ensureMicroState(id){ if(!v2Profile.micros[id]) v2Profile.micros[id]=emptySkillState(); v2Profile.micros[id]=normalizeState(v2Profile.micros[id]); return v2Profile.micros[id]; }
+
+  let NAME="", TUTOR_NAME="", TUTOR="";
+  let cap=MAX_LEVEL, locked=false, mins=2, devMode=false, packs=defaultPacks();
+  const checkSec=()=>mins*60;
+  let level=MIN_LEVEL, reached=MIN_LEVEL;
+  let session=[],cur=null,attempts=0,busy=false,qStart=0,checkTimer=null,replaceNext=false,hintLevel=0,hintsUsed=0;
+  const $=id=>document.getElementById(id);
+  const rand=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+
+  function normalizePacks(p){
+    var d=defaultPacks();
+    if(!p||typeof p!=="object") return d;
+    PACKS.forEach(function(k){ if(typeof p[k]==="boolean") d[k]=p[k]; });
+    if(!d.addition && !d.subtraction && !d.multiplication && !d.division && !d.clock && !d.money && !d.daily){ d.addition=true; d.subtraction=true; }
+    return d;
+  }
+  function activePacks(){
+    if(!devMode) return {addition:true,subtraction:true,multiplication:false,division:false,clock:false,money:false,daily:false};
+    return normalizePacks(packs);
+  }
+  function packOn(cat){ return !!activePacks()[cat]; }
+
+  function ensureAdaptiveProfile(){
+    if(!v2Profile.assessment) v2Profile.assessment={active:!v2History.length,completed:!!v2History.length,responses:v2History.length,startedAt:nowISO()};
+    if(typeof v2Profile.assessment.responses!=="number") v2Profile.assessment.responses=0;
+    if(!v2Profile.program) v2Profile.program={version:0,lastUpdate:null,step:1,ceiling:1,focusSkills:[],focusMicros:[],reason:"Valutazione iniziale",nextUpdateAt:V2_CFG.programUpdateEvery};
+    if(typeof v2Profile.program.step!=="number") v2Profile.program.step=1;
+    if(typeof v2Profile.program.ceiling!=="number") v2Profile.program.ceiling=1;
+    if(!Array.isArray(v2Profile.program.focusSkills)) v2Profile.program.focusSkills=[];
+    if(!Array.isArray(v2Profile.program.focusMicros)) v2Profile.program.focusMicros=[];
+  }
+  function recentPerformance(n){
+    var h=v2History.slice(-n); if(!h.length) return {n:0,auto:0,assisted:0,wrong:0,autoRate:0,wrongRate:0,avgSec:0};
+    var auto=h.filter(function(x){return x.outcome==="autonomous";}).length;
+    var assisted=h.filter(function(x){return x.outcome && (x.outcome.indexOf("hinted_")===0||x.outcome==="second_try");}).length;
+    var wrong=h.filter(function(x){return x.outcome==="wrong"||x.outcome==="unknown"||x.outcome==="shown";}).length;
+    var secs=h.reduce(function(a,x){return a+(+x.sec||0);},0)/h.length;
+    return {n:h.length,auto:auto,assisted:assisted,wrong:wrong,autoRate:auto/h.length,wrongRate:wrong/h.length,avgSec:secs};
+  }
+  function recalcAdaptiveProgram(force){
+    ensureAdaptiveProfile();
+    var perf=recentPerformance(Math.min(12,v2History.length));
+    if(!force && perf.n<V2_CFG.programUpdateEvery) return false;
+    var rows=skillSnapshot().filter(function(r){return r.st.attempts>0;});
+    rows.sort(function(a,b){return priorityScore(b.skill,b.st)-priorityScore(a.skill,a.st);});
+    var focus=rows.slice(0,3).map(function(r){return r.skill.id;});
+    var micros=Object.keys(v2Profile.micros||{}).map(function(id){return {id:id,st:ensureMicroState(id)};}).filter(function(x){return x.st.attempts>0;});
+    micros.sort(function(a,b){return microPriority(b.id,b.st)-microPriority(a.id,a.st);});
+    var focusMicros=micros.slice(0,4).map(function(x){return x.id;});
+    var p=v2Profile.program;
+    var oldCeiling=p.ceiling||1, next=oldCeiling;
+    if(perf.n>=6){
+      if(perf.autoRate>=0.72 && perf.wrongRate<=0.18) next=Math.min(MAX_LEVEL,oldCeiling+1);
+      else if(perf.autoRate<=0.38 || perf.wrongRate>=0.45) next=Math.max(1,oldCeiling-1);
+    }
+    p.step=Math.max(1,next); p.ceiling=next; p.focusSkills=focus; p.focusMicros=focusMicros; p.version=(p.version||0)+1; p.lastUpdate=nowISO(); p.nextUpdateAt=v2History.length+V2_CFG.programUpdateEvery;
+    p.reason=perf.autoRate>=0.72&&perf.wrongRate<=0.18?"Prestazione stabile: piccolo aumento di difficoltà":perf.autoRate<=0.38||perf.wrongRate>=0.45?"Prestazione fragile: piccolo passo indietro e recupero":"Prestazione mista: consolidamento senza salto di livello";
+    if(v2Profile.assessment.active && (v2History.length>=V2_CFG.assessmentMaxResponses || (v2History.length>=V2_CFG.assessmentMinResponses && rows.length>=8 && rows.every(function(r){return r.st.attempts>=2;})))){
+      v2Profile.assessment.active=false; v2Profile.assessment.completed=true; p.reason="Valutazione iniziale completata: programma personalizzato attivo";
+    }
+    saveV2Profile(); return true;
+  }
+  function startAssessment(){
+    ensureAdaptiveProfile(); v2Profile.assessment={active:true,completed:false,responses:0,startedAt:nowISO()}; v2Profile.program={version:0,lastUpdate:null,step:1,ceiling:MAX_LEVEL,focusSkills:[],focusMicros:[],reason:"Valutazione iniziale",nextUpdateAt:V2_CFG.programUpdateEvery};
+    packs={addition:true,subtraction:true,multiplication:true,division:true,clock:true,money:true,daily:true}; cap=MAX_LEVEL; saveV2Profile();
+  }
+function loadV2(){
+    v2Profile=v2LoadJSON(V2_KEYS.profile, emptyProfile());
+    if(!v2Profile||v2Profile.version!==2) v2Profile=emptyProfile();
+    if(!v2Profile.skills) v2Profile.skills={};
+    if(!v2Profile.micros) v2Profile.micros={};
+    if(!v2Profile.recentSigs) v2Profile.recentSigs=[];
+    if(!v2Profile.recentEq) v2Profile.recentEq=[];
+    if(!v2Profile.recentMicros) v2Profile.recentMicros=[];
+    v2History=v2LoadJSON(V2_KEYS.history, []);
+    if(!Array.isArray(v2History)) v2History=[];
+    v2Settings=v2LoadJSON(V2_KEYS.settings, emptyV2Settings());
+    if(!v2Settings||typeof v2Settings!=="object") v2Settings=emptyV2Settings();
+    NAME=v2Settings.name||""; TUTOR_NAME=v2Settings.tutorName||""; TUTOR=v2Settings.email||"";
+    cap=clamp(v2Settings.cap,MIN_LEVEL,MAX_LEVEL); locked=!!v2Settings.locked; mins=clamp(v2Settings.mins,1,10);
+    devMode=!!v2Settings.devMode; packs=normalizePacks(v2Settings.packs);
+  }
+  function saveV2Profile(){ v2Profile.updatedAt=nowISO(); v2SaveJSON(V2_KEYS.profile, v2Profile); }
+  function saveV2History(){ v2SaveJSON(V2_KEYS.history, v2History.slice(-V2_CFG.maxHistory)); }
+  function saveV2Settings(){
+    v2Settings={name:NAME,tutorName:TUTOR_NAME,email:TUTOR,cap:cap,locked:locked,mins:mins,devMode:devMode,packs:normalizePacks(packs)};
+    v2SaveJSON(V2_KEYS.settings, v2Settings);
+  }
+  function resetV2Profile(){ v2Profile=emptyProfile(); v2History=[]; saveV2Profile(); saveV2History(); }
+  function clearV1KeysOnly(){ V1_KEYS.forEach(function(k){ try{ localStorage.removeItem(k); }catch(e){} }); }
+
+  var SKILLS=[
+    {id:"add_5",category:"addition",name:"Addizioni entro 5",difficulty:1,prerequisites:[],op:"+"},
+    {id:"add_10",category:"addition",name:"Addizioni entro 10",difficulty:2,prerequisites:["add_5"],op:"+"},
+    {id:"add_20",category:"addition",name:"Addizioni entro 20",difficulty:3,prerequisites:["add_10"],op:"+"},
+    {id:"add_carry",category:"addition",name:"Addizioni con riporto",difficulty:4,prerequisites:["add_10"],op:"+"},
+    {id:"add_2digit",category:"addition",name:"Addizioni a due cifre",difficulty:5,prerequisites:["add_20","add_carry"],op:"+"},
+    {id:"sub_5",category:"subtraction",name:"Sottrazioni entro 5",difficulty:1,prerequisites:[],op:"-"},
+    {id:"sub_10",category:"subtraction",name:"Sottrazioni entro 10",difficulty:2,prerequisites:["sub_5"],op:"-"},
+    {id:"sub_20",category:"subtraction",name:"Sottrazioni entro 20",difficulty:3,prerequisites:["sub_10"],op:"-"},
+    {id:"sub_borrow",category:"subtraction",name:"Sottrazioni con prestito",difficulty:4,prerequisites:["sub_10"],op:"-"},
+    {id:"sub_2digit",category:"subtraction",name:"Sottrazioni a due cifre",difficulty:5,prerequisites:["sub_20","sub_borrow"],op:"-"},
+    {id:"mul_2",category:"multiplication",name:"Tabellina del 2",difficulty:5,prerequisites:[],n:2},
+    {id:"mul_5",category:"multiplication",name:"Tabellina del 5",difficulty:5,prerequisites:[],n:5},
+    {id:"mul_10",category:"multiplication",name:"Tabellina del 10",difficulty:5,prerequisites:[],n:10},
+    {id:"mul_3",category:"multiplication",name:"Tabellina del 3",difficulty:6,prerequisites:["mul_2"],n:3},
+    {id:"mul_4",category:"multiplication",name:"Tabellina del 4",difficulty:6,prerequisites:["mul_2"],n:4},
+    {id:"mul_6",category:"multiplication",name:"Tabellina del 6",difficulty:7,prerequisites:["mul_3"],n:6},
+    {id:"mul_7",category:"multiplication",name:"Tabellina del 7",difficulty:7,prerequisites:["mul_2"],n:7},
+    {id:"mul_8",category:"multiplication",name:"Tabellina del 8",difficulty:8,prerequisites:["mul_4"],n:8},
+    {id:"mul_9",category:"multiplication",name:"Tabellina del 9",difficulty:8,prerequisites:["mul_3"],n:9},
+    {id:"mul_mixed",category:"multiplication",name:"Moltiplicazioni miste",difficulty:8,prerequisites:["mul_6","mul_7"]},
+    {id:"div_exact_small",category:"division",name:"Divisioni esatte piccole",difficulty:6,prerequisites:[]},
+    {id:"div_2",category:"division",name:"Divisioni per 2",difficulty:6,prerequisites:["div_exact_small"],n:2},
+    {id:"div_5",category:"division",name:"Divisioni per 5",difficulty:6,prerequisites:["div_exact_small"],n:5},
+    {id:"div_10",category:"division",name:"Divisioni per 10",difficulty:6,prerequisites:["div_exact_small"],n:10},
+    {id:"div_exact_medium",category:"division",name:"Divisioni esatte medie",difficulty:8,prerequisites:["div_2","div_5"]},
+    {id:"div_remainder",category:"division",name:"Divisioni con resto",difficulty:9,prerequisites:["div_exact_medium"]},
+    {id:"clock_hour",category:"clock",name:"Ore intere",difficulty:3,prerequisites:[]},
+    {id:"clock_half",category:"clock",name:"Ore e mezza",difficulty:4,prerequisites:["clock_hour"]},
+    {id:"clock_quarter",category:"clock",name:"Quarti d'ora",difficulty:5,prerequisites:["clock_half"]},
+    {id:"clock_5min",category:"clock",name:"Intervalli di 5 minuti",difficulty:6,prerequisites:["clock_quarter"]},
+    {id:"clock_minutes",category:"clock",name:"Minuti precisi",difficulty:7,prerequisites:["clock_5min"]},
+    {id:"clock_add_30",category:"clock",name:"Tra mezz'ora",difficulty:5,prerequisites:["clock_half"]},
+    {id:"clock_add_60",category:"clock",name:"Tra un'ora",difficulty:4,prerequisites:["clock_hour"]},
+    {id:"clock_sub_30",category:"clock",name:"Mezz'ora fa",difficulty:6,prerequisites:["clock_add_30"]},
+    {id:"clock_sub_60",category:"clock",name:"Un'ora fa",difficulty:5,prerequisites:["clock_add_60"]},
+    {id:"clock_interval",category:"clock",name:"Quanto tempo passa",difficulty:7,prerequisites:["clock_minutes"]},
+    {id:"clock_daily_context",category:"clock",name:"Orari della giornata",difficulty:6,prerequisites:["clock_hour"]},
+    {id:"money_recognize",category:"money",name:"Riconoscere monete",difficulty:3,prerequisites:[]},
+    {id:"money_sum",category:"money",name:"Somma di soldi",difficulty:4,prerequisites:["money_recognize"]},
+    {id:"money_compare",category:"money",name:"Confrontare importi",difficulty:4,prerequisites:["money_recognize"]},
+    {id:"money_total",category:"money",name:"Totale da pagare",difficulty:5,prerequisites:["money_sum"]},
+    {id:"money_change",category:"money",name:"Resto",difficulty:6,prerequisites:["money_total"]},
+    {id:"money_purchase",category:"money",name:"Acquisto semplice",difficulty:6,prerequisites:["money_change"]},
+    {id:"money_budget",category:"money",name:"Budget quotidiano",difficulty:8,prerequisites:["money_purchase"]},
+    {id:"time_sequence",category:"daily",name:"Sequenze temporali",difficulty:3,prerequisites:[]},
+    {id:"calendar_day",category:"daily",name:"Giorni della settimana",difficulty:3,prerequisites:[]},
+    {id:"calendar_date",category:"daily",name:"Date del calendario",difficulty:4,prerequisites:["calendar_day"]},
+    {id:"duration",category:"daily",name:"Durate",difficulty:5,prerequisites:["time_sequence"]},
+    {id:"quantity",category:"daily",name:"Quantità",difficulty:2,prerequisites:[]},
+    {id:"comparison",category:"daily",name:"Confronti",difficulty:3,prerequisites:["quantity"]},
+    {id:"simple_problem",category:"daily",name:"Problema semplice",difficulty:6,prerequisites:["add_20","sub_20"]},
+    {id:"real_life_problem",category:"daily",name:"Problema quotidiano",difficulty:8,prerequisites:["simple_problem"]}
+  ];
+  var SKILL_BY_ID={}; SKILLS.forEach(function(s){ SKILL_BY_ID[s.id]=s; });
+  function skillById(id){ return SKILL_BY_ID[id]; }
+  function implementedSkills(){ return SKILLS.filter(function(s){ return packOn(s.category); }); }
+  function skillUnlocked(skill){
+    if(!skill.prerequisites||!skill.prerequisites.length) return true;
+    return skill.prerequisites.every(function(pid){
+      var st=ensureSkillState(pid);
+      if(st.mastery>=V2_CFG.unlockMastery) return true;
+      if(st.attempts>=V2_CFG.unlockSoftAttempts && st.mastery>=V2_CFG.unlockSoftMastery) return true;
+      var prereq=skillById(pid);
+      if(prereq && !packOn(prereq.category)) return true;
+      return false;
+    });
+  }
+  function skillAllowedByCap(skill){
+    var maxDiff=cap<=0?1:cap<=2?3:cap<=4?5:cap<=6?7:10;
+    if(locked) maxDiff=Math.min(maxDiff, Math.max(1, cap<=2?3:Math.ceil(cap/2)+2));
+    return skill.difficulty<=maxDiff;
+  }
+
+  function hasCarry(a,b){ return (a%10)+(b%10)>=10; }
+  function hasBorrow(a,b){ return (a%10)<(b%10); }
+  function hhmm(h,m){ return String((h+24)%24).padStart(2,"0")+":"+String(((m%60)+60)%60).padStart(2,"0"); }
+  function clockAllowed(h,m){
+    var t=hhmm(h,m), h24=(h+24)%24, mm=((m%60)+60)%60;
+    var a=[t, h24+"."+String(mm).padStart(2,"0")];
+    if(mm===0){ a.push(String(h24), String(h24).padStart(2,"0")); var h12=h24%12; if(h12===0) h12=12; a.push(String(h12)); }
+    return a;
+  }
+  function itemBase(skill, text, target, allowed, hints, extra){
+    extra=extra||{};
+    var micro=extra.micro||(skill.id+"|"+target);
+    var autoExplanation = extra.explanation || "";
+    if(!autoExplanation && skill.category==="daily" && extra.op==="h" && extra.a) autoExplanation = extra.a+" ore = "+extra.a+" gruppi da 60 minuti. Per verificare: 60 × "+extra.a+" = ?";
+    return {
+      text:text, target:String(target), allowed:(allowed||[String(target)]).map(String),
+      cat:PACK_LABEL[skill.category]||skill.category,
+      hint:hints[0]||"", hints:hints,
+      a:extra.a||0, b:extra.b||0, op:extra.op||"",
+      kind:skill.category, skillId:skill.id,
+      microId:micro, microFamily:extra.microFamily||micro.split("|")[0],
+      sig:extra.sig||(skill.id+"|"+text),
+      itemKey:extra.itemKey||extra.sig||(skill.id+"|"+text),
+      eqSig:extra.eq||micro,
+      structure:extra.structure||skill.id,
+      localDifficulty:extra.diff||skill.difficulty,
+      explanation:autoExplanation
+    };
+  }
+
+  function genAddSub(skill,targetMicro){
+    var a=1,b=1,tries=0;
+    while(tries++<100){
+      if(skill.id==="add_5"){ a=rand(1,4); b=rand(1,5-a); }
+      else if(skill.id==="add_10"){ a=rand(1,9); b=rand(1,Math.max(1,10-a)); if(a+b<=5&&Math.random()<0.7) continue; }
+      else if(skill.id==="add_20"){ a=rand(2,15); b=rand(1,Math.max(1,20-a)); if(a+b<=10&&Math.random()<0.65) continue; }
+      else if(skill.id==="add_carry"){ var x=rand(1,9), y=rand(10-x,9); a=rand(0,1)*10+x; b=rand(0,1)*10+y; if(!hasCarry(a,b)) continue; }
+      else if(skill.id==="add_2digit"){ a=rand(10,40); b=rand(10,40); }
+      else if(skill.id==="sub_5"){ a=rand(2,5); b=rand(1,a); }
+      else if(skill.id==="sub_10"){ a=rand(3,10); b=rand(1,a); if(a<=5&&Math.random()<0.6) continue; }
+      else if(skill.id==="sub_20"){ a=rand(6,20); b=rand(1,a); if(a<=10&&Math.random()<0.6) continue; }
+      else if(skill.id==="sub_borrow"){ var ones=rand(0,8), subOnes=rand(ones+1,9); a=rand(1,2)*10+ones; b=rand(0,Math.floor(a/10))*10+subOnes; if(b>=a||!hasBorrow(a,b)) continue; }
+      else if(skill.id==="sub_2digit"){ a=rand(15,40); b=rand(10,a-1); }
+      else return null;
+      if(skill.op==="-"&&b>=a) continue;
+      var target=skill.op==="+"?a+b:a-b, op=skill.op;
+      var hints=op==="+"?[a+" e ancora "+b,"Parti da "+a+" e conta "+b+" in più",a+" + "+b+" = "+target]:["Da "+b+" quanto manca a "+a,"Parti da "+a+" e togli "+b,a+" − "+b+" = "+target];
+      var micro=arithmeticMicro(op,a,b,target);
+      if(targetMicro && micro!==targetMicro) continue;
+      var difficulty=skill.difficulty;
+      if(op==="+"||op==="-"){
+        var carry=op==="+"?hasCarry(a,b):hasBorrow(a,b);
+        difficulty += carry?1:0;
+        if(target>15) difficulty+=1;
+      }
+      return itemBase(skill,a+" "+op+" "+b+" = ?",target,[String(target)],hints,{a:a,b:b,op:op,micro:micro,microFamily:op,sig:op+"|"+a+"|"+b,structure:op==="+"?(hasCarry(a,b)?"add_carry":"add_plain"):(hasBorrow(a,b)?"sub_borrow":"sub_plain"),diff:difficulty});
+    }
+    return null;
+  }
+  function genMul(skill){
+    var a,b;
+    if(skill.id==="mul_mixed"){ a=rand(2,9); b=rand(2,9); }
+    else { a=skill.n||2; b=rand(2,10); if(Math.random()<0.5){ var t=a; a=b; b=t; } }
+    var target=a*b;
+    return itemBase(skill, a+" x "+b+" = ?", target, [String(target)], [a+" per "+b, "Somma "+a+" per "+b+" volte", a+" x "+b+" = "+target], {a:a,b:b,op:"*",micro:"*|"+Math.min(a,b)+"|"+Math.max(a,b),sig:"*|"+a+"|"+b});
+  }
+  function genDiv(skill){
+    var b,res,a,r=0;
+    if(skill.id==="div_remainder"){
+      b=rand(3,9); res=rand(2,8); r=rand(1,b-1); a=b*res+r;
+      return itemBase(skill, a+" : "+b+" resto = ?", r, [String(r)], ["Quante volte sta "+b+" in "+a+", poi il resto", b+" x "+res+" = "+(b*res)+", avanza "+r, "Resto "+r], {a:a,b:b,op:"/",micro:"%/|"+a+"|"+b,structure:"div_rem"});
+    }
+    if(skill.n){ b=skill.n; res=rand(2,10); }
+    else if(skill.id==="div_exact_medium"){ b=rand(3,9); res=rand(6,12); }
+    else { b=rand(2,5); res=rand(2,6); }
+    a=b*res;
+    return itemBase(skill, a+" : "+b+" = ?", res, [String(res)], [b+" x ? = "+a, "Quante volte sta "+b+" in "+a, a+" : "+b+" = "+res], {a:a,b:b,op:"/",micro:"/|"+a+"|"+b});
+  }
+  function genClock(skill){
+    var h,m,nh,nm,delta=0,text,hints;
+    if(skill.id==="clock_hour"){ h=rand(8,18); m=0; delta=rand(1,3)*60; }
+    else if(skill.id==="clock_half"){ h=rand(8,18); m=Math.random()<0.5?0:30; delta=30; }
+    else if(skill.id==="clock_quarter"){ h=rand(8,18); m=[0,15,30,45][rand(0,3)]; delta=15; }
+    else if(skill.id==="clock_5min"){ h=rand(8,18); m=rand(0,11)*5; delta=5; }
+    else if(skill.id==="clock_minutes"){ h=rand(8,18); m=rand(0,59); delta=rand(3,20); }
+    else if(skill.id==="clock_add_30"){ h=rand(8,18); m=Math.random()<0.5?0:30; delta=30; }
+    else if(skill.id==="clock_add_60"){ h=rand(8,18); m=0; delta=60; }
+    else if(skill.id==="clock_sub_30"){ h=rand(8,18); m=Math.random()<0.5?0:30; delta=-30; }
+    else if(skill.id==="clock_sub_60"){ h=rand(9,18); m=0; delta=-60; }
+    else if(skill.id==="clock_interval"){
+      h=rand(8,16); m=[0,15,30][rand(0,2)]; var h2=h+rand(1,3); var m2=[0,15,30][rand(0,2)];
+      var mins=((h2*60+m2)-(h*60+m));
+      return itemBase(skill, "Dalle "+hhmm(h,m)+" alle "+hhmm(h2,m2)+" passano ? minuti", mins, [String(mins)], ["Conta le ore e i minuti","Da "+hhmm(h,m)+" a "+hhmm(h2,m2), mins+" minuti"], {structure:"interval",delta:mins});
+    }
+    else {
+      var ctx=[{n:"colazione",h:8},{n:"pranzo",h:13},{n:"merenda",h:16},{n:"cena",h:20}][rand(0,3)];
+      delta=[30,60][rand(0,1)]; h=ctx.h; m=0;
+      text="È l'ora di "+ctx.n+" ("+hhmm(h,m)+"). Tra "+(delta===60?"1 ora":"mezz'ora")+" che ora sarà?";
+      nh=h+Math.floor(delta/60); nm=m+(delta%60); if(nm>=60){ nh++; nm-=60; }
+      return itemBase(skill, text, hhmm(nh,nm), clockAllowed(nh,nm), ["Parti da "+hhmm(h,m),"Aggiungi "+(delta===60?"un'ora":"30 minuti"), hhmm(nh,nm)], {structure:"daily_clock",delta:delta});
+    }
+    var start=hhmm(h,m);
+    var tot=h*60+m+delta; if(tot<0) tot+=24*60;
+    nh=Math.floor(tot/60)%24; nm=tot%60;
+    var lab=delta<0?(delta===-60?"un'ora fa":"mezz'ora fa"):(delta===60?"1 ora":delta===30?"mezz'ora":delta+" minuti");
+    text=delta<0?("Sono le "+start+". "+(delta===-60?"Un'ora fa":"Mezz'ora fa")+" che ora era?"):("Sono le "+start+". Tra "+lab+", che ora sarà?");
+    hints=["Parti da "+start, (delta<0?"Togli ":"Aggiungi ")+lab, hhmm(nh,nm)];
+    return itemBase(skill, text, hhmm(nh,nm), clockAllowed(nh,nm), hints, {structure:skill.id,sig:skill.id+"|"+start+"|"+delta,delta:delta});
+  }
+  function genMoney(skill){
+    var coins=[1,2,5,10];
+    if(skill.id==="money_recognize"){ var c=coins[rand(0,3)]; return itemBase(skill,"Una moneta da "+c+" euro. Valore?",c,[String(c)],["Guarda il numero sulla moneta","Vale "+c+" euro"],{micro:"coin|"+c}); }
+    if(skill.id==="money_sum"){ var x=coins[rand(0,2)], y=coins[rand(0,2)]; return itemBase(skill,x+" euro + "+y+" euro = ?",x+y,[String(x+y)],[x+" e ancora "+y, String(x+y)+" euro"],{a:x,b:y,op:"+"}); }
+    if(skill.id==="money_compare"){ var p=rand(2,9), q=rand(1,p-1); return itemBase(skill,p+" euro e "+q+" euro. Quanti euro in più il primo?",p-q,[String(p-q)],["Togli il più piccolo dal più grande", (p-q)+" euro"],{a:p,b:q,op:"-"}); }
+    if(skill.id==="money_total"){ var n=rand(2,4), price=rand(2,5); return itemBase(skill,n+" cose da "+price+" euro. Totale?",n*price,[String(n*price)],[price+" per "+n+" volte", String(n*price)+" euro"],{a:n,b:price,op:"*"}); }
+    if(skill.id==="money_change"){ var pay=[10,20][rand(0,1)], cost=rand(3,pay-1); return itemBase(skill,"Costa "+cost+" euro. Pago "+pay+". Resto?",pay-cost,[String(pay-cost)],["Da "+cost+" a "+pay, String(pay-cost)+" euro"],{a:pay,b:cost,op:"-"}); }
+    if(skill.id==="money_purchase"){ var a=rand(2,6), b=rand(2,6), pay=20; var tot=a+b; return itemBase(skill,"Due cose: "+a+" e "+b+" euro. Pago 20. Resto?",pay-tot,[String(pay-tot)],["Prima "+a+"+"+b+" = "+tot,"Poi 20 − "+tot, String(pay-tot)+" euro"],{structure:"purchase"}); }
+    var budget=rand(8,15), spent=rand(2,budget-1); return itemBase(skill,"Ho "+budget+" euro. Spendo "+spent+". Rimangono?",budget-spent,[String(budget-spent)],["Togli "+spent+" da "+budget, String(budget-spent)+" euro"],{a:budget,b:spent,op:"-"});
+  }
+  function genDaily(skill){
+    if(skill.id==="time_sequence"){ var h1=rand(7,16); var add=rand(1,3); return itemBase(skill,"Sono le "+h1+". Tra "+add+" ore che ora è? (solo ora)",(h1+add)%24,[String((h1+add)%24),hhmm((h1+add)%24,0)],["Aggiungi "+add+" ore", String((h1+add)%24)],{structure:"seq"}); }
+    if(skill.id==="calendar_day"){
+      var days=["lunedì","martedì","mercoledì","giovedì","venerdì","sabato","domenica"];
+      var i=rand(0,6), add=rand(1,3), j=(i+add)%7;
+      return itemBase(skill, days[i]+" + "+add+" giorni. Che giorno? (1 lun … 7 dom)", j+1, [String(j+1)], ["Conta "+add+" giorni dopo "+days[i], days[j]+" = "+(j+1)], {micro:"dow|"+i+"|"+add});
+    }
+    if(skill.id==="calendar_date"){ var d=rand(5,20), add=rand(1,5); return itemBase(skill,"Oggi è il "+d+". Tra "+add+" giorni?",d+add,[String(d+add)],["Aggiungi "+add+" al "+d, String(d+add)],{a:d,b:add,op:"+"}); }
+    if(skill.id==="duration"){ var h=rand(1,4); return itemBase(skill,h+" ore = ? minuti",h*60,[String(h*60)],["1 ora = 60 minuti", String(h*60)],{a:h,op:"h"}); }
+    if(skill.id==="quantity"){ var n=rand(2,5), q=rand(2,6); return itemBase(skill,n+" gruppi da "+q+". Totale?",n*q,[String(n*q)],[n+" per "+q, String(n*q)],{a:n,b:q,op:"*"}); }
+    if(skill.id==="comparison"){ var a=rand(6,20), b=rand(1,a-1); return itemBase(skill,a+" è più grande di "+b+" di quanto?",a-b,[String(a-b)],[a+" − "+b, String(a-b)],{a:a,b:b,op:"-"}); }
+    if(skill.id==="simple_problem"){ var a=rand(4,12), b=rand(2,8); if(Math.random()<0.5) return itemBase(skill,"Ho "+a+" mele. Ne prendo "+b+". Totale?",a+b,[String(a+b)],[a+" + "+b, String(a+b)],{a:a,b:b,op:"+"}); return itemBase(skill,"Ho "+(a+b)+" caramelle. Ne do "+b+". Restano?",a,[String(a)],[(a+b)+" − "+b, String(a)],{a:a+b,b:b,op:"-"}); }
+    var price=rand(2,6), n=rand(2,4), pay=20; return itemBase(skill,"Compro "+n+" cose da "+price+" euro. Pago 20. Resto?",pay-n*price,[String(pay-n*price)],["Prima "+n+" x "+price+" = "+(n*price),"Poi 20 − "+(n*price), String(pay-n*price)],{structure:"real"});
+  }
+  function generateForSkill(skill, avoid, targetMicro){
+    avoid=avoid||{};
+    var tries=0, best=null;
+    while(tries++<80){
+      var item=null;
+      if(skill.category==="addition"||skill.category==="subtraction") item=genAddSub(skill,targetMicro);
+      else if(skill.category==="multiplication") item=genMul(skill);
+      else if(skill.category==="division") item=genDiv(skill);
+      else if(skill.category==="clock") item=genClock(skill);
+      else if(skill.category==="money") item=genMoney(skill);
+      else item=genDaily(skill);
+      if(!item) continue;
+      if(targetMicro && item.microId!==targetMicro && (skill.category==="addition"||skill.category==="subtraction")) continue;
+      if(avoid.sigs && avoid.sigs.indexOf(item.sig)>=0) continue;
+      if(avoid.eq && avoid.eq.indexOf(item.eqSig)>=0 && tries<45) continue;
+      if(avoid.micros && avoid.micros.indexOf(item.microId)>=0 && tries<25) continue;
+      best=item; break;
+    }
+    if(!best){
+      if(skill.category==="addition"||skill.category==="subtraction") best=genAddSub(skill,null);
+      else if(skill.category==="multiplication") best=genMul(skill);
+      else if(skill.category==="division") best=genDiv(skill);
+      else if(skill.category==="clock") best=genClock(skill);
+      else if(skill.category==="money") best=genMoney(skill);
+      else best=genDaily(skill);
+    }
+    return best||genAddSub(skillById("add_5"));
+  }
+
+  function classifySkill(skill, st){
+    var overdue=st.nextReview && new Date(st.nextReview).getTime()<=Date.now();
+    if(st.attempts<3 && skillUnlocked(skill)) return "novel";
+    if(st.mastery<=40 || st.consecutiveWrong>0 || st.recentWrong>=2) return "recovery";
+    if(st.mastery<=80) return "consolidate";
+    if(overdue || st.mastery>=81) return "maintain";
+    return "consolidate";
+  }
+  function priorityScore(skill, st){
+    var score=10;
+    score += (100-st.mastery)*0.45;
+    if(st.consecutiveWrong>0) score += 18*st.consecutiveWrong;
+    if(st.recentWrong>0) score += 10*st.recentWrong;
+    if(st.lastSeen) score += Math.min(25, daysFrom(st.lastSeen)*3); else score += 20;
+    if(st.nextReview && new Date(st.nextReview).getTime()<=Date.now()) score += 16 + Math.min(20, daysFrom(st.nextReview)*2);
+    if(st.averageResponseTime>=V2_CFG.slowSec) score += 8;
+    if(st.attempts && st.hintsUsed/Math.max(1,st.attempts)>0.4) score += 10;
+    if(masteryBand(st.mastery).id==="unstable") score += 12;
+    if(v2Profile.lastSkillId===skill.id) score -= 16;
+    if(st.lastSeen && daysFrom(st.lastSeen)<0.01) score -= 12;
+    if(st.mastery>=81 && st.consecutiveCorrect>=3) score -= 14;
+    score += Math.random()*8;
+    return score;
+  }
+  function pickBucket(){
+    if(v2Profile.forceMode==="easy") return "recovery";
+    if(v2Profile.forceMode==="review") return "maintain";
+    if(v2Profile.forceMode==="novel") return "novel";
+    var r=Math.random()*100, m=V2_CFG.mix;
+    if(r<m.recovery) return "recovery";
+    if(r<m.recovery+m.consolidate) return "consolidate";
+    if(r<m.recovery+m.consolidate+m.maintain) return "maintain";
+    return "novel";
+  }
+  function selectSkill(){
+    ensureAdaptiveProfile();
+    var assessment=v2Profile.assessment&&v2Profile.assessment.active;
+    var pool=implementedSkills().filter(function(s){ return (assessment ? true : skillAllowedByCap(s)) && (assessment ? true : skillUnlocked(s)); });
+    if(!assessment && v2Profile.program && v2Profile.program.focusSkills && v2Profile.program.focusSkills.length){
+      var focused=pool.filter(function(s){return v2Profile.program.focusSkills.indexOf(s.id)>=0;});
+      if(focused.length && Math.random()<0.72) pool=focused;
+    }
+    if(!pool.length) pool=implementedSkills().filter(function(s){ return s.difficulty<=1; });
+    if(!pool.length) pool=SKILLS.filter(function(s){ return s.id==="add_5"||s.id==="sub_5"; });
+    var bucket=pickBucket(), order=[bucket,"recovery","consolidate","maintain","novel"], seen={};
+    for(var i=0;i<order.length;i++){
+      var b=order[i]; if(seen[b]) continue; seen[b]=1;
+      var cand=pool.filter(function(s){ return classifySkill(s, ensureSkillState(s.id))===b; });
+      if(!cand.length) continue;
+      cand.sort(function(a,c){ return priorityScore(c,ensureSkillState(c.id))-priorityScore(a,ensureSkillState(a.id)); });
+      var top=cand.slice(0, Math.max(2, Math.min(4, cand.length)));
+      return top[rand(0, top.length-1)];
+    }
+    return pool[rand(0, pool.length-1)];
+  }
+  function microPriority(mid,st){
+    var score=(100-st.mastery)*0.7+(st.recentWrong||0)*14+(st.consecutiveWrong||0)*18;
+    if(st.nextReview && new Date(st.nextReview).getTime()<=Date.now()) score+=22;
+    if(st.averageResponseTime>=V2_CFG.slowSec) score+=8;
+    if(st.attempts<3) score+=10;
+    score+=Math.random()*5;
+    return score;
+  }
+  function selectMicro(skill){
+    var ids=[];
+    Object.keys(v2Profile.micros||{}).forEach(function(id){
+      var belongs=skill.category==="addition"?id.indexOf("+|")===0:skill.category==="subtraction"?id.indexOf("-|")===0:id.indexOf(skill.id+"|")===0;
+      if(belongs) ids.push(id);
+    });
+    if(!ids.length) return null;
+    var rows=ids.map(function(id){ return {id:id,st:ensureMicroState(id),score:microPriority(id,ensureMicroState(id))}; });
+    rows.sort(function(a,b){ return b.score-a.score; });
+    var top=rows.slice(0,Math.min(V2_CFG.microTopN,rows.length));
+    return top[rand(0,top.length-1)].id;
+  }
+  function selectQuestion(){
+    var skill=selectSkill();
+    var targetMicro=selectMicro(skill);
+    var item=generateForSkill(skill,{sigs:v2Profile.recentSigs.slice(-V2_CFG.recentExact),eq:v2Profile.recentEq.slice(-V2_CFG.recentEquivalent),micros:v2Profile.recentMicros.slice(-V2_CFG.recentMicro)},targetMicro);
+    v2Profile.lastSkillId=skill.id;
+    return item;
+  }
+
+  function applyDelta(st, delta, sec, outcome, hintsN, item){
+    st=normalizeState(st); var beforeDay=st.lastSessionDay, ts=nowISO(), dk=dayKey(ts);
+    st.attempts++; st.lastSeen=ts; st.lastOutcome=outcome; st.hintsUsed += hintsN||0;
+    if(beforeDay!==dk){ st.sessionsSeen++; st.lastSessionDay=dk; if(outcome==="autonomous") st.autonomousSessions++; }
+    st.averageResponseTime=st.attempts===1?sec:Math.round(((st.averageResponseTime*(st.attempts-1))+sec)*10/st.attempts)/10;
+    st.recentOutcomes.push(outcome); if(st.recentOutcomes.length>V2_CFG.microRecentOutcomes) st.recentOutcomes.shift();
+    if(outcome==="autonomous"||outcome==="second_try"||outcome==="hinted"||outcome.indexOf("hinted_")===0){
+      st.correct++; st.consecutiveCorrect++; st.consecutiveWrong=0; st.recentWrong=Math.max(0,(st.recentWrong||0)-1);
+      if(outcome==="autonomous") st.autonomousCorrect++; else st.assistedCorrect++;
+      st.stableStreak=outcome==="autonomous"?st.stableStreak+1:Math.max(0,st.stableStreak-1);
+    }else{
+      st.wrong++; st.consecutiveWrong++; st.consecutiveCorrect=0; st.recentWrong=(st.recentWrong||0)+1; st.stableStreak=0;
+      if(item&&item.structure) st.errorPatterns[item.structure]=(st.errorPatterns[item.structure]||0)+1;
+    }
+    if(item) st.lastDifficulty=item.localDifficulty;
+    st.mastery=clamp(st.mastery+delta,0,100);
+    if(outcome==="autonomous" && st.stableStreak>=4) st.workingMax=st.lastDifficulty;
+    if(outcome==="wrong"||outcome==="unknown"||outcome==="shown") st.workingMax=st.lastDifficulty;
+  }
+  function updateSpacedRepetition(st, okAuto){
+    st=normalizeState(st);
+    var consolidated=okAuto && st.mastery>=70 && st.attempts>=5 && st.autonomousCorrect>=4 && st.sessionsSeen>=2 && st.autonomousSessions>=2 && st.stableStreak>=3;
+    if(consolidated){
+      st.srStep=Math.min(V2_CFG.srDays.length-1,(st.srStep||0)+1); st.reviewInterval=V2_CFG.srDays[st.srStep]; st.nextReview=addDays(nowISO(),st.reviewInterval);
+    }else if(!okAuto){
+      st.srStep=Math.max(0,(st.srStep||0)-1); st.reviewInterval=V2_CFG.srDays[st.srStep]||1; st.nextReview=addDays(nowISO(),Math.min(2,st.reviewInterval));
+    }else if(!st.nextReview){ st.reviewInterval=1; st.nextReview=addDays(nowISO(),1); }
+  }
+  function evaluateOutcome(ok, attempts, hintsN, unknown, shown){
+    if(unknown) return "unknown"; if(shown) return "shown"; if(!ok) return "wrong";
+    if(hintsN>0) return "hinted_"+Math.min(3,hintsN);
+    if(attempts===1) return "autonomous"; return "second_try";
+  }
+  function learnFromItem(item,user,ok,sec,attempts,hintsN,unknown,shown){
+    var outcome=evaluateOutcome(ok,attempts,hintsN,unknown,shown);
+    var delta=V2_CFG.masteryDelta[outcome];
+    if(typeof delta!=="number") delta=outcome.indexOf("hinted_")===0?(outcome==="hinted_1"?2:outcome==="hinted_2"?0:-1):0;
+    var st=ensureSkillState(item.skillId), micro=ensureMicroState(item.microId);
+    applyDelta(st,delta,sec,outcome,hintsN,item); applyDelta(micro,delta,sec,outcome,hintsN,item);
+    updateSpacedRepetition(st,outcome==="autonomous"); updateSpacedRepetition(micro,outcome==="autonomous");
+    v2Profile.recentSigs.push(item.sig); if(v2Profile.recentSigs.length>60) v2Profile.recentSigs.shift();
+    v2Profile.recentEq.push(item.eqSig); if(v2Profile.recentEq.length>40) v2Profile.recentEq.shift();
+    v2Profile.recentMicros.push(item.microId); if(v2Profile.recentMicros.length>20) v2Profile.recentMicros.shift();
+    var rec={ts:nowISO(),skillId:item.skillId,microId:item.microId,microFamily:item.microFamily,sig:item.sig,itemKey:item.itemKey,eqSig:item.eqSig,structure:item.structure,q:item.text,user:user,correct:item.target,ok:!!ok,sec:sec,att:attempts,hintsUsed:hintsN||0,hintLevel:hintsN||0,outcome:outcome,autonomous:outcome==="autonomous",masteryAfter:st.mastery,microMasteryAfter:micro.mastery,localDifficulty:item.localDifficulty};
+    v2History.push(rec);
+    ensureAdaptiveProfile();
+    if(v2Profile.assessment.active){ v2Profile.assessment.responses=v2History.length; }
+    saveV2Profile(); saveV2History();
+    if(v2History.length>=V2_CFG.programUpdateEvery && (v2History.length % V2_CFG.programUpdateEvery===0 || (v2Profile.assessment.active && v2History.length===V2_CFG.assessmentMinResponses))) recalcAdaptiveProgram(false);
+    return rec;
+  }
+
+  function skillSnapshot(){
+    return implementedSkills().map(function(s){ var st=ensureSkillState(s.id); return {skill:s,st:st,band:masteryBand(st.mastery),priority:Math.round(priorityScore(s,st)),bucket:classifySkill(s,st)}; });
+  }
+  function parentReportLines(){
+    var rows=skillSnapshot();
+    var acquired=rows.filter(function(r){ return r.st.attempts>=V2_CFG.minAttemptsAcquired && r.st.mastery>=81; });
+    var unstable=rows.filter(function(r){ return r.st.attempts>0 && r.st.mastery<=60; });
+    var review=rows.filter(function(r){ return r.st.nextReview && new Date(r.st.nextReview).getTime()<=Date.now(); });
+    var recent=v2History.slice(-12);
+    var lines=["Allenamento osservato (non è una valutazione clinica)."];
+    lines.push("Competenze più solide: "+(acquired.map(function(r){return r.skill.name;}).join(", ")||"ancora nessuna con abbastanza prove"));
+    lines.push("Da rinforzare: "+(unstable.map(function(r){return r.skill.name;}).join(", ")||"nessuna evidenza recente"));
+    lines.push("Da ripassare: "+(review.map(function(r){return r.skill.name;}).join(", ")||"nessuna in scadenza"));
+    var errs=recent.filter(function(x){ return !x.ok; });
+    lines.push("Errori recenti: "+(errs.map(function(x){return x.q+" → "+x.user;}).join("; ")||"nessuno in questa finestra"));
+    lines.push("Aiuti usati (ultime domande): "+recent.reduce(function(a,x){return a+(x.hintsUsed||0);},0));
+    var timed=recent.filter(function(x){return x.sec;});
+    var avg=timed.length?Math.round(timed.reduce(function(a,x){return a+x.sec;},0)/timed.length):0;
+    lines.push("Tempo medio recente: "+(avg?avg+"s":"—"));
+    return lines;
+  }
+
+  function resetTheme(){ var top=document.querySelector('.pane-top'); if(top) top.classList.remove('tone-ok','tone-warn','tone-err'); }
+  function theme(k){ resetTheme(); var top=document.querySelector('.pane-top'); if(top&&k) top.classList.add('tone-'+k); }
+  function derivedLevel(){
+    var used=implementedSkills().map(function(s){ return ensureSkillState(s.id); }).filter(function(s){ return s.attempts>0; });
+    if(!used.length) return MIN_LEVEL;
+    return clamp(Math.round(used.reduce(function(a,s){return a+s.mastery;},0)/used.length/10), MIN_LEVEL, cap);
+  }
+  function show(id){ ["screen-menu","screen-ex","screen-end","screen-set","screen-dev"].forEach(function(s){ $(s).classList.toggle("hidden",s!==id); }); $("card").classList.toggle("is-ex",id==="screen-ex"); if(id==="screen-menu") updateMini(); if(id==="screen-set") fillSettings(); if(id==="screen-dev"){ updateDevDashboard(); refreshTutorPanel(); } }
+  function updateMini(){
+    $("coach-text").textContent=NAME?("Ciao "+NAME+"! Pronto a giocare?"):"Ciao! Pronto a giocare?";
+    var hint=$("menu-hint");
+    if(hint) hint.textContent="Puoi fermarti quando vuoi con «Per oggi basta»: ogni "+mins+" minut"+(mins===1?"o":"i")+" te lo chiederò anch’io.";
+  }
+  function updateLevelUI(){ level=derivedLevel(); if(level>reached) reached=level; }
+  function getAns(){ const el=$("ans"); return el.classList.contains("empty")?"":(el.textContent||"").trim(); }
+  function setAns(v){ const el=$("ans"); if(!v){ el.textContent="Risposta"; el.classList.add("empty"); } else { el.textContent=v; el.classList.remove("empty"); } }
+  function gaugeColor(v){ return v<=3?"#34c759":v<=7?"#ff9f0a":"#ff3b30"; }
+  function needle(val,color){ const t=val/MAX_LEVEL,a=Math.PI*(1+t); return "<line x1='50' y1='50' x2='"+(50+36*Math.cos(a))+"' y2='"+(50+36*Math.sin(a))+"' stroke='"+color+"' stroke-width='3' stroke-linecap='round'/>"; }
+  function drawGauge(id,val){
+    const el=$(id); if(!el) return;
+    const t=val/MAX_LEVEL,col=gaugeColor(val);
+    el.innerHTML="<path d='M14 50 A36 36 0 0 1 86 50' fill='none' stroke='#e5e5ea' stroke-width='10' stroke-linecap='round'/>"+"<path d='M14 50 A36 36 0 0 1 86 50' fill='none' stroke='"+col+"' stroke-width='10' stroke-linecap='round' stroke-dasharray='"+(t*113)+" 113'/>"+needle(val,"#3a3a3c")+"<circle cx='50' cy='50' r='4' fill='#3a3a3c'/>";
+  }
+  function syncLockBtn(){ var b=$("set-lock"); if(!b) return; b.className="lock-btn "+(locked?"on":"off"); b.textContent=locked?"Tetto bloccato a "+cap+" · tocca per sbloccare":"Tetto aperto a "+cap+" · tocca per bloccare"; }
+  function syncDevUI(){
+    var btn=$("btn-devmode");
+    if(btn){ btn.className="lock-btn "+(devMode?"on":"off"); btn.textContent=devMode?"Modalità sviluppatore ON · tocca per chiudere":"Modalità sviluppatore · tocca per aprire"; }
+    var box=$("dev-packs");
+    if(box){
+      box.innerHTML=PACKS.map(function(k){
+        return "<label class='chk'><input type='checkbox' data-pack='"+k+"'"+(packs[k]?" checked":"")+"> "+PACK_LABEL[k]+"</label>";
+      }).join("");
+      box.querySelectorAll("input[data-pack]").forEach(function(inp){
+        inp.onchange=function(){ packs[inp.getAttribute("data-pack")]=inp.checked; packs=normalizePacks(packs); };
+      });
+    }
+  }
+  function syncSetSliders(){
+    $("set-cap").value=String(cap); $("set-cap-num").textContent=cap+"/"+MAX_LEVEL;
+    syncLockBtn(); $("set-mins").value=String(mins); $("set-mins-num").textContent=mins+" min";
+    const li=levelInfo(cap); $("set-level-desc").textContent=li.label+" — "+li.desc+" · in V2 il tetto limita le competenze nuove.";
+    $("g-now-val").textContent=String(derivedLevel()); $("g-cap-val").textContent=String(cap);
+    drawGauge("g-now",Math.min(derivedLevel(),cap)); drawGauge("g-cap",cap);
+    syncDevUI();
+  }
+  function fillSettings(){ $("set-name").value=NAME||""; $("set-tutor-name").value=TUTOR_NAME||""; $("set-email").value=TUTOR||""; syncSetSliders(); }
+
+
+  function pct(n,d){ return d ? Math.round(n/d*100) : 0; }
+  function fmtWhen(v){ if(!v) return "—"; var d=new Date(v); return isNaN(d.getTime())?"—":d.toLocaleString("it-IT",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}); }
+  function skillName(id){ var x=skillById(id); return x?x.name:id||"—"; }
+  function updateDevDashboard(){
+    ensureAdaptiveProfile();
+    var hist=Array.isArray(v2History)?v2History:[], attemptsN=hist.length;
+    var autoN=hist.filter(function(x){return x.outcome==="autonomous";}).length;
+    var assistedN=hist.filter(function(x){return x.outcome && (x.outcome.indexOf("hinted_")===0||x.outcome==="second_try");}).length;
+    var wrongN=hist.filter(function(x){return x.outcome==="wrong"||x.outcome==="unknown"||x.outcome==="shown";}).length;
+    if($("dev-kpi-attempts")) $("dev-kpi-attempts").textContent=attemptsN;
+    if($("dev-kpi-auto")) $("dev-kpi-auto").textContent=pct(autoN,attemptsN)+"%";
+    if($("dev-kpi-assisted")) $("dev-kpi-assisted").textContent=pct(assistedN,attemptsN)+"%";
+    if($("dev-kpi-wrong")) $("dev-kpi-wrong").textContent=pct(wrongN,attemptsN)+"%";
+    var p=v2Profile.program||{}, a=v2Profile.assessment||{};
+    if($("dev-assessment-banner")){
+      $("dev-assessment-banner").innerHTML=a.active?"<strong>Valutazione iniziale in corso</strong><p>L’app sta esplorando le aree disponibili. Non serve impostare un programma manualmente: raccogliamo abbastanza prove e poi partiamo con un percorso personalizzato.</p>":"<strong>Programma personalizzato attivo</strong><p>La fase esplorativa è terminata. Il motore aggiorna automaticamente il percorso ogni "+V2_CFG.programUpdateEvery+" risposte.</p>";
+    }
+    if($("dev-program-title")) $("dev-program-title").textContent="Programma · passo "+(p.step||1);
+    if($("dev-program-text")) $("dev-program-text").textContent=p.reason||"In osservazione";
+    if($("dev-plan-bar")) $("dev-plan-bar").style.width=Math.min(100,((p.step||1)/Math.max(1,MAX_LEVEL))*100)+"%";
+    if($("dev-next-text")) $("dev-next-text").textContent=a.active?("Esplorazione: "+attemptsN+" prove raccolte"):("Rivalutazione tra "+Math.max(0,(p.nextUpdateAt||0)-attemptsN)+" risposte");
+    var used=Object.keys(v2Profile.skills||{}).map(function(id){return {id:id,st:ensureSkillState(id)};}).filter(function(x){return x.st.attempts>0;});
+    used.sort(function(a,b){return a.st.mastery-b.st.mastery;});
+    if($("dev-skills-body")) $("dev-skills-body").innerHTML=used.map(function(x){var st=x.st, band=masteryBand(st.mastery); return "<tr><td><strong>"+skillName(x.id)+"</strong><br><span class='dev-small'>"+x.id+"</span></td><td>"+band.label+"<br>"+st.mastery+"</td><td>"+st.attempts+"</td><td>"+pct(st.autonomousCorrect,st.attempts)+"%</td><td>"+st.assistedCorrect+"</td><td>"+st.wrong+"</td></tr>";}).join("")||"<tr><td colspan='6'>Ancora nessuna competenza osservata.</td></tr>";
+    var micros=Object.keys(v2Profile.micros||{}).map(function(id){return {id:id,st:ensureMicroState(id)};}).filter(function(x){return x.st.attempts>0;});
+    micros.sort(function(a,b){return microPriority(b.id,b.st)-microPriority(a.id,a.st);});
+    if($("dev-micros-body")) $("dev-micros-body").innerHTML=micros.map(function(x){var st=x.st, band=masteryBand(st.mastery); return "<tr><td><strong>"+x.id+"</strong></td><td>"+band.label+"<br>"+st.mastery+"</td><td>"+st.attempts+"</td><td>"+pct(st.autonomousCorrect,st.attempts)+"%</td><td>"+st.wrong+"</td><td>"+(Math.round(st.averageResponseTime*10)/10)+"s</td></tr>";}).join("")||"<tr><td colspan='6'>Ancora nessuna micro-competenza osservata.</td></tr>";
+    var focus=micros.slice(0,4);
+    if($("dev-focus-list")) $("dev-focus-list").innerHTML=focus.length?focus.map(function(x){var st=x.st; var why=st.wrong>=2?"molti errori":st.hintsUsed>=st.attempts?"richiede aiuto":st.mastery<50?"mastery fragile":st.averageResponseTime>=V2_CFG.slowSec?"lento":"da consolidare"; return "<div class='dev-callout'><h3>"+x.id+" · "+masteryBand(st.mastery).label+"</h3><p>Priorità: "+why+". Prove "+st.attempts+", autonomia "+pct(st.autonomousCorrect,st.attempts)+"%, errori "+st.wrong+".</p></div>";}).join(""):"<div class='dev-callout'><p>Servono ancora dati. L’app continuerà a esplorare.</p></div>";
+    if($("dev-history-body")) $("dev-history-body").innerHTML=hist.slice(-30).reverse().map(function(x){return "<tr><td>"+fmtWhen(x.ts)+"</td><td>"+skillName(x.skillId)+"</td><td>"+(x.microId||"—")+"</td><td>"+(x.outcome||"—")+"</td><td>"+(x.hintsUsed||0)+"</td><td>"+(x.sec||0)+"s</td></tr>";}).join("")||"<tr><td colspan='6'>Nessun esercizio registrato.</td></tr>";
+    var perf=recentPerformance(Math.min(12,hist.length)), q=[];
+    if(!attemptsN) q.push("Partire con la valutazione iniziale: non ci sono ancora elementi per decidere un programma.");
+    else {
+      q.push("Il motore sta lavorando su: "+((p.focusSkills||[]).map(skillName).join(", ")||"esplorazione")+".");
+      if(perf.autoRate>=.72 && perf.wrongRate<=.18) q.push("Le ultime prove sono abbastanza stabili: l’app può fare un piccolo passo avanti.");
+      else if(perf.autoRate<=.38 || perf.wrongRate>=.45) q.push("Le ultime prove mostrano fragilità: l’app mantiene/riduce il passo e aumenta il recupero.");
+      else q.push("Le ultime prove sono miste: l’app mantiene la zona di lavoro e consolida prima di salire.");
+      if(focus.length) q.push("Priorità attuale: "+focus.slice(0,2).map(function(x){return x.id;}).join(" e ")+".");
+    }
+    if($("dev-quick-read")) $("dev-quick-read").textContent=q.join(" ");
+    if($("dev-automation-read")) $("dev-automation-read").textContent="Ogni "+V2_CFG.programUpdateEvery+" risposte il motore ricalcola priorità e difficoltà locale. L’aumento o la riduzione avviene di un solo piccolo passo alla volta; il tetto impostato dal tutor resta un limite separato.";
+  }
+
+  function pedagogicalHint(item,level){
+    if(!item) return "";
+    var l=Math.max(1,Math.min(3,level));
+    var a=item.a,b=item.b,op=item.op;
+    if(item.kind==="clock"){
+      var delta=item.delta;
+      if(typeof delta==="number" && Math.abs(delta)>=60){
+        var mins=Math.abs(delta), hours=Math.floor(mins/60), rest=mins%60;
+        if(l===1) return "Prima trasforma i minuti in ore: ricorda che 60 minuti formano 1 ora.";
+        if(l===2) return "Raggruppa i minuti in gruppi da 60: 60 + 60 + 60 + ... fino ad arrivare a "+mins+". Quanti gruppi hai formato?";
+        return "Completa il passaggio: 60 × ? = "+mins+". Quel numero indica quante ore devi aggiungere o togliere.";
+      }
+      if(item.structure==="interval"){
+        if(l===1) return "Conta prima le ore intere tra l'inizio e la fine.";
+        if(l===2) return "Dopo le ore intere, conta i minuti rimasti.";
+        return "Somma ore e minuti trasformando ogni ora in 60 minuti. Non scrivere ancora il risultato finale.";
+      }
+      if(l===1) return "Parti dall'orario indicato e pensa a piccoli passi di 5, 15, 30 o 60 minuti.";
+      if(l===2) return "Decidi prima se cambia solo l'ora o anche i minuti.";
+      return "Fai il passaggio sul quadrante senza cercare subito il risultato finale.";
+    }
+    if(item.kind==="daily" && item.op==="h"){
+      if(l===1) return "Ricorda la relazione tra ore e minuti: quante volte 60 minuti formano le ore richieste?";
+      if(l===2) return "Costruisci gruppi da 60 minuti: 60 + 60 + 60 ... fino al numero indicato. Quanti gruppi servono?";
+      return "Completa: 60 × ? = il numero di minuti della domanda. Non inserire ancora la risposta finale.";
+    }
+    if(op==="+"){
+      if(l===1) return "Metti insieme i due numeri: parti dal primo e aggiungi il secondo.";
+      if(l===2) return "Se è più semplice, scomponi il secondo numero in parti più piccole e aggiungile una alla volta.";
+      return (item.structure==="add_carry"?"Controlla prima le unità: se superano 9, c'è un riporto alle decine.":"Conta con ordine, senza saltare numeri. Non serve indovinare il risultato.");
+    }
+    if(op==="-"){
+      if(l===1) return "Parti dal numero più grande e togli il secondo.";
+      if(l===2) return "Scomponi la sottrazione in passi piccoli. Controlla prima le unità.";
+      return item.structure==="sub_borrow"?"Se le unità non bastano, prendi una decina e trasformala in 10 unità.":"Controlla il passaggio cifra per cifra.";
+    }
+    if(op==="*"){
+      if(l===1) return "Pensa alla moltiplicazione come a gruppi uguali.";
+      if(l===2) return "Ripeti lo stesso numero tante volte quanto indica l'altro fattore.";
+      return "Usa la tabellina del numero più facile da riconoscere e verifica il conteggio dei gruppi.";
+    }
+    if(op==="/"){
+      if(l===1) return "Chiediti quante volte il divisore sta nel numero iniziale.";
+      if(l===2) return "Puoi controllare la divisione usando la moltiplicazione inversa.";
+      return "Trova il numero di gruppi uguali senza calcolare ancora la risposta finale.";
+    }
+    if(item.kind==="money"){
+      if(l===1) return "Individua prima il valore di ogni moneta o prezzo.";
+      if(l===2) return op==="-"?"Confronta prima il prezzo con i soldi disponibili.":"Metti insieme gli importi uno alla volta.";
+      return "Fai un passaggio alla volta e controlla l'unità: euro, non centesimi.";
+    }
+    if(l===1) return "Leggi la domanda e individua quali numeri devi usare.";
+    if(l===2) return "Decidi quale operazione rappresenta la situazione.";
+    return "Esegui l'operazione in piccoli passaggi e controlla il risultato.";
+  }
+
+  function currentHint(){ return pedagogicalHint(cur,hintLevel) || (cur&&cur.hint||""); }
+  function showHintFeedback(kind){
+    var fb=$("fb"); fb.classList.remove("hidden"); var h=currentHint();
+    if(kind==="warn"){
+      theme("warn"); fb.className="fb fb-warn fb-anim-sad1";
+      fb.innerHTML="Non è corretto. Riprova."+(h?"<span class='fb-sub hint-method'>"+h+"</span>":"");
+    } else {
+      theme("err"); fb.className="fb fb-err fb-anim-err";
+      var explanation=cur&&cur.explanation?("<span class='fb-sub hint-method'>"+cur.explanation+"</span>"):"";
+      fb.innerHTML="Non è corretto.<span class='fb-sub hint-method'>La risposta è <strong>"+(cur?cur.target:"—")+"</strong>.</span>"+explanation;
+    }
+  }
+  function nextQ(){
+    cur=selectQuestion(); attempts=0; hintLevel=0; hintsUsed=0; if(cur) cur.hintLevel=0;
+    const qel=$("qtext"); qel.textContent=cur.text; qel.classList.remove("anim-pop"); void qel.offsetWidth; qel.classList.add("anim-pop");
+    setAns(""); busy=false; replaceNext=false; $("btn-ok").disabled=false; $("fb").className="fb hidden"; resetTheme(); qStart=Date.now();
+    refreshTutorLive();
+  }
+  function start(){
+    session=[]; updateLevelUI(); show("screen-ex");
+    if(checkTimer) clearTimeout(checkTimer);
+    checkTimer=setTimeout(function(){ $("cp-text").textContent="Stai giocando da "+mins+" minut"+(mins===1?"o":"i")+". Continuiamo o ci fermiamo?"; $("checkpoint").classList.remove("hidden"); }, checkSec()*1000);
+    nextQ();
+  }
+  function afterItem(){ nextQ(); }
+  function closeItem(user, ok, unknown, shown){
+    var sec=Math.round((Date.now()-qStart)/1000);
+    session.push(learnFromItem(cur, user, ok, sec, attempts, hintsUsed, unknown, shown));
+    updateLevelUI(); refreshTutorLive(); updateDevDashboard();
+  }
+  function normAns(s){ return String(s).toLowerCase().replace(/\s+/g,"").replace(".",":"); }
+  function check(){
+    if(busy) return; const val=getAns(); if(!val) return; attempts++;
+    const ok=cur.allowed.some(function(a){ return normAns(a)===normAns(val); });
+    if(ok){
+      theme("ok"); var fb=$("fb"); fb.classList.remove("hidden"); fb.className="fb fb-ok fb-anim-joy1"; fb.textContent="Giusto.";
+      var top=document.querySelector(".pane-top"); if(top){ top.classList.remove("anim-celeb"); void top.offsetWidth; top.classList.add("anim-celeb"); }
+      busy=true; $("btn-ok").disabled=true; closeItem(val,true,false,false); setTimeout(afterItem,900);
+    } else {
+      hintLevel=Math.min(3, hintLevel+1); hintsUsed++; if(cur) cur.hintLevel=hintLevel; replaceNext=true;
+      if(hintLevel>=3){ busy=true; $("btn-ok").disabled=true; showHintFeedback("err"); closeItem(val,false,false,true); setTimeout(afterItem,1400); }
+      else { showHintFeedback("warn"); refreshTutorLive(); }
+    }
+  }
+  function skip(){
+    if(busy) return; var typed=getAns(); var empty=!typed;
+    if(hintLevel<3){ hintLevel++; hintsUsed++; if(cur) cur.hintLevel=hintLevel; replaceNext=true; showHintFeedback(hintLevel>=3?"err":"warn"); if(hintLevel<3){ refreshTutorLive(); return; } }
+    attempts=Math.max(attempts,1); busy=true; $("btn-ok").disabled=true; showHintFeedback("err");
+    closeItem(empty?"NON_LO_SO":("SKIP:"+typed), false, empty, !empty); setTimeout(afterItem,1400);
+  }
+  function finish(title){
+    if(checkTimer) clearTimeout(checkTimer); $("checkpoint").classList.add("hidden"); saveV2History(); saveV2Profile();
+    const ok=session.filter(function(x){return x.ok;}).length;
+    $("end-title").textContent=title;
+    var skipN=session.filter(function(x){return x.outcome==="unknown"||x.outcome==="shown";}).length;
+    var auto=session.filter(function(x){return x.outcome==="autonomous";}).length;
+    var avg=session.length?Math.round(session.reduce(function(a,x){return a+x.sec;},0)/session.length):0;
+    $("sum").innerHTML="Oggi: "+session.length+" esercizi, "+ok+" corretti, "+auto+" da solo, "+skipN+" con aiuto finale"+(session.length?", media "+avg+"s":"")+".<br><br>"+parentReportLines().join("<br>");
+    $("mail-note").textContent=TUTOR?"Tra pochi secondi si aprirà l’app Mail.":"Nessuna email tutor in Impostazioni.";
+    show("screen-end"); if(!TUTOR) return;
+    var body=(TUTOR_NAME?("Ciao "+TUTOR_NAME+",\n\n"):"")+"REPORT ALLENAMENTO MATEMATICA"+(NAME?" – "+NAME:"")+"\n"+new Date().toLocaleString("it-IT")+"\nIndicatori di allenamento, non valutazione clinica.\n\nOGGI\nEsercizi: "+session.length+"\nCorretti: "+ok+"\nAutonomi: "+auto+"\n";
+    if(session.length) body+="Tempo medio: "+avg+"s\n";
+    body+="\n"+parentReportLines().join("\n")+"\n\nDettaglio:\n";
+    session.forEach(function(x,n){ body+=(n+1)+". ["+x.skillId+"] "+x.q+" → "+x.user+" · "+x.outcome+" · "+x.sec+"s\n"; });
+    setTimeout(function(){ location.href="mailto:"+TUTOR+"?subject="+encodeURIComponent("Report Matematica"+(NAME?" – "+NAME:""))+"&body="+encodeURIComponent(body); },3500);
+  }
+  function enough(){ finish(NAME?("Per oggi basta "+NAME+", sei stato bravo!"):"Per oggi basta, sei stato bravo!"); }
+
+  function tutorLiveText(){
+    if(!cur) return "Nessuna domanda attiva.";
+    var s=skillById(cur.skillId), st=ensureSkillState(cur.skillId);
+    return ["Competenza: "+(s?s.name:cur.skillId)+" ("+cur.skillId+")","Micro: "+cur.microId+" · "+cur.structure,"Mastery: "+st.mastery+" · "+masteryBand(st.mastery).label,
+      "Micro mastery: "+ensureMicroState(cur.microId).mastery+" · diff "+cur.localDifficulty,"Tentativi "+st.attempts+" · corrette "+st.correct+" · errate "+st.wrong,"Autonome "+st.autonomousCorrect+" · aiuto "+st.assistedCorrect,"Aiuti domanda: "+hintsUsed+" (livello "+hintLevel+")","Tempo medio: "+st.averageResponseTime+"s","Prossima revisione: "+(st.nextReview||"—"),"Priorità "+Math.round(priorityScore(s,st))+" · "+classifySkill(s,st),"Forzatura: "+(v2Profile.forceMode||"no")+" · dev: "+(devMode?"ON":"OFF")].join("\n");
+  }
+  function refreshTutorLive(){ var el=$("tutor-live"); if(el) el.textContent=tutorLiveText(); }
+  function refreshTutorPanel(){
+    refreshTutorLive();
+    var box=$("tutor-skills"); if(!box) return;
+    box.innerHTML=skillSnapshot().map(function(r){ return "<div class='tutor-row'><strong>"+r.skill.id+"</strong> "+r.st.mastery+" · "+r.bucket+" · t"+r.st.attempts+"</div>"; }).join("");
+  }
+  function setForce(mode){ v2Profile.forceMode=mode||null; saveV2Profile(); refreshTutorPanel(); }
+  function exportV2(){
+    var txt=JSON.stringify({profile:v2Profile,history:v2History,settings:v2Settings,exportedAt:nowISO(),app:"math_training_v2"},null,2);
+    $("tutor-json").value=txt;
+    try{ var a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([txt],{type:"application/json"})); a.download="math_training_v2.json"; a.click(); }catch(e){}
+  }
+  function importV2(){
+    var raw=$("tutor-json").value.trim(); if(!raw) return;
+    try{
+      var data=JSON.parse(raw);
+      if(data.profile) v2Profile=data.profile;
+      if(data.history) v2History=data.history;
+      if(data.settings){ v2Settings=data.settings; NAME=v2Settings.name||NAME; TUTOR_NAME=v2Settings.tutorName||TUTOR_NAME; TUTOR=v2Settings.email||TUTOR; cap=clamp(v2Settings.cap,MIN_LEVEL,MAX_LEVEL); locked=!!v2Settings.locked; mins=clamp(v2Settings.mins||mins,1,10); devMode=!!v2Settings.devMode; packs=normalizePacks(v2Settings.packs); }
+      saveV2Profile(); saveV2History(); saveV2Settings(); fillSettings(); updateMini(); $("tutor-test-out").textContent="Import ok.";
+    }catch(e){ $("tutor-test-out").textContent="JSON non valido."; }
+  }
+  function v2RunSelfTest(){
+    var out=[], pass=0, fail=0;
+    function t(name, cond){ if(cond){ pass++; out.push("OK  "+name); } else { fail++; out.push("FAIL  "+name); } }
+    var snapP=JSON.stringify(v2Profile), snapH=JSON.stringify(v2History), savedDev=devMode, savedPacks=JSON.stringify(packs);
+    devMode=true; packs={addition:true,subtraction:true,multiplication:true,division:true,clock:true,money:true,daily:true};
+    t("add_5 esiste", !!skillById("add_5"));
+    t("mul_2 si genera", !!generateForSkill(skillById("mul_2"),{}));
+    t("div_2 si genera", generateForSkill(skillById("div_2"),{}).op==="/");
+    t("clock_add_60 ha :", String(generateForSkill(skillById("clock_add_60"),{}).target).indexOf(":")>=0);
+    t("money_change numerico", !isNaN(+generateForSkill(skillById("money_change"),{}).target));
+    t("daily quantity", !!generateForSkill(skillById("quantity"),{}));
+    var item=generateForSkill(skillById("add_10"),{});
+    var before=ensureSkillState("add_10").mastery;
+    learnFromItem(item,item.target,true,3,1,0,false,false);
+    t("autonoma alza mastery", ensureSkillState("add_10").mastery>before);
+    t("micro strutturale", /^\+\|/.test(item.microId));
+    var targetMicro=item.microId, targeted=generateForSkill(skillById("add_10"),{},targetMicro);
+    t("generatore raggiunge il micro", targeted && targeted.microId===targetMicro);
+    t("outcome distingue hint 1", evaluateOutcome(true,1,1,false,false)==="hinted_1");
+    t("SR non accelera subito", ensureSkillState("add_10").reviewInterval<=1);
+    var sigs=v2Profile.recentSigs.slice();
+    t("niente sig vuota", sigs.every(function(s){ return !!s; }));
+    t("namespace V2", V2_KEYS.profile.indexOf("math_training_v2_")===0);
+    t("V1 keys distinte", V1_KEYS.indexOf(V2_KEYS.profile)<0);
+    var v1n=LS.get("m_name"); resetV2Profile();
+    t("reset V2 non cancella m_name", LS.get("m_name")===v1n);
+    v2Profile=JSON.parse(snapP); v2History=JSON.parse(snapH); saveV2Profile(); saveV2History();
+    devMode=savedDev; packs=JSON.parse(savedPacks);
+    $("tutor-test-out").textContent=out.join("\n")+"\n\n"+pass+" ok / "+fail+" fail";
+  }
+
+  $("pad").addEventListener("pointerdown",function(e){
+    const btn=e.target.closest("button"); if(!btn||busy) return; e.preventDefault();
+    const k=btn.getAttribute("data-k"), curVal=getAns();
+    if(k==="del"){ setAns(curVal.slice(0,-1)); replaceNext=false; }
+    else if(replaceNext){ setAns(k===":"?":":k); replaceNext=false; }
+    else if(curVal.length<10) setAns(curVal+k);
+  });
+  let pressTimer=null; const setBtn=$("btn-settings");
+  setBtn.addEventListener("pointerdown",function(e){
+    e.preventDefault(); setBtn.classList.add("pressing");
+    pressTimer=setTimeout(function(){ setBtn.classList.remove("pressing"); fillSettings(); show("screen-set"); },900);
+  });
+  ["pointerup","pointerleave","pointercancel"].forEach(function(ev){ setBtn.addEventListener(ev,function(){ clearTimeout(pressTimer); setBtn.classList.remove("pressing"); }); });
+  $("set-cap").addEventListener("input",function(){ cap=clamp(+$("set-cap").value,MIN_LEVEL,MAX_LEVEL); syncSetSliders(); updateLevelUI(); });
+  $("set-lock").addEventListener("click",function(){ locked=!locked; syncLockBtn(); });
+  $("set-mins").addEventListener("input",function(){ mins=clamp(+$("set-mins").value||2,1,10); $("set-mins-num").textContent=mins+" min"; updateMini(); });
+  $("btn-open-dev").addEventListener("click",function(){ devMode=true; syncDevUI(); show("screen-dev"); });
+  $("btn-dev-back").addEventListener("click",function(){ show("screen-set"); });
+  document.querySelectorAll("[data-devtab]").forEach(function(btn){
+    btn.addEventListener("click",function(){
+      var tab=btn.getAttribute("data-devtab");
+      document.querySelectorAll("[data-devtab]").forEach(function(b){b.classList.toggle("active",b===btn);});
+      ["overview","skills","micros","history","tools","legend"].forEach(function(x){
+        var el=$("devtab-"+x); if(el) el.classList.toggle("hidden",x!==tab);
+      });
+      if(tab==="overview"||tab==="skills"||tab==="micros"||tab==="history") updateDevDashboard();
+    });
+  });
+  $("btn-packs-all").addEventListener("click",function(){ PACKS.forEach(function(k){ packs[k]=true; }); packs=normalizePacks(packs); syncDevUI(); });
+  $("btn-packs-core").addEventListener("click",function(){ packs=defaultPacks(); saveV2Settings(); syncDevUI(); });
+  $("btn-assessment-now").addEventListener("click",function(){ startAssessment(); updateDevDashboard(); });
+  $("btn-program-reset").addEventListener("click",function(){ recalcAdaptiveProgram(true); updateDevDashboard(); });
+
+  function persistSettings(){
+    NAME=$("set-name").value.trim(); TUTOR_NAME=$("set-tutor-name").value.trim(); TUTOR=$("set-email").value.trim()||TUTOR;
+    cap=clamp(+$("set-cap").value,MIN_LEVEL,MAX_LEVEL); mins=clamp(+$("set-mins").value||2,1,10);
+    saveV2Settings(); updateMini(); updateLevelUI(); syncSetSliders();
+  }
+  var modalCb=null;
+  function openModal(text, needCancel, cb, danger, triple){
+    $("modal-text").textContent=text;
+    $("modal-no").style.display=needCancel?"":"none";
+    $("modal-stay").style.display=triple?"":"none";
+    $("modal-yes").textContent=triple?"Salva ed esci":(needCancel?"Conferma":"Ok");
+    $("modal-stay").textContent="Salva e rimani";
+    $("modal-yes").className=danger?"btn btn-danger":"btn";
+    $("modal").classList.remove("hidden"); modalCb=cb||null;
+  }
+  $("btn-save").onclick=function(){ openModal("Salvare le impostazioni?", true, function(choice){ if(!choice) return; persistSettings(); if(choice==="yes") show("screen-menu"); }, false, true); };
+  $("btn-reset-level").onclick=function(){ openModal("Azzerare solo chiavi V1 livello?", true, function(ok){ if(!ok) return; try{ localStorage.removeItem("m_level"); localStorage.removeItem("m_reached"); }catch(e){} updateLevelUI(); syncSetSliders(); }, true); };
+  $("btn-reset-hist").onclick=function(){ openModal("Cancellare solo storico V1?", true, function(ok){ if(!ok) return; try{ localStorage.setItem("m_hist","[]"); }catch(e){} }, true); };
+  $("btn-reset-all").onclick=function(){ openModal("Cancellare solo dati V1? Il profilo V2 resta.", true, function(ok){ if(!ok) return; clearV1KeysOnly(); updateMini(); updateLevelUI(); syncSetSliders(); }, true); };
+  $("btn-set-back").onclick=function(){ var s=v2LoadJSON(V2_KEYS.settings,v2Settings); cap=clamp(s.cap,MIN_LEVEL,MAX_LEVEL); locked=!!s.locked; devMode=!!s.devMode; packs=normalizePacks(s.packs); show("screen-menu"); };
+  $("cp-continue").onclick=function(){ $("checkpoint").classList.add("hidden"); if(checkTimer) clearTimeout(checkTimer); checkTimer=setTimeout(function(){ $("cp-text").textContent="Stai giocando da "+mins+" minut"+(mins===1?"o":"i")+". Continuiamo o ci fermiamo?"; $("checkpoint").classList.remove("hidden"); },checkSec()*1000); };
+  $("cp-stop").onclick=function(){ $("checkpoint").classList.add("hidden"); enough(); };
+  $("modal-yes").onclick=function(){ $("modal").classList.add("hidden"); if(modalCb) modalCb("yes"); modalCb=null; };
+  $("modal-stay").onclick=function(){ $("modal").classList.add("hidden"); if(modalCb) modalCb("stay"); modalCb=null; };
+  $("modal-no").onclick=function(){ $("modal").classList.add("hidden"); if(modalCb) modalCb(false); modalCb=null; };
+  $("help-toggle").onclick=function(){ $("help-box").classList.toggle("hidden"); };
+  $("btn-start").onclick=start; $("btn-enough").onclick=enough; $("btn-ok").onclick=check; $("btn-skip").onclick=skip; $("btn-home").onclick=function(){ show("screen-menu"); };
+  $("scale-info").innerHTML="<table class='scale-table'>"+LEVEL_INFO.map(function(t){ var n=t.min===t.max?String(t.min):t.min+"–"+t.max; return "<tr><td class='n'>"+n+"</td><td class='l'>"+t.label+"</td><td class='d'>"+t.desc+"</td></tr>"; }).join("")+"</table>";
+  $("btn-force-easy").onclick=function(){ setForce("easy"); };
+  $("btn-force-review").onclick=function(){ setForce("review"); };
+  $("btn-force-new").onclick=function(){ setForce("novel"); };
+  $("btn-force-off").onclick=function(){ setForce(null); };
+  $("btn-reset-skill").onclick=function(){ if(!cur) return; v2Profile.skills[cur.skillId]=emptySkillState(); saveV2Profile(); refreshTutorPanel(); };
+  $("btn-reset-v2").onclick=function(){ openModal("Azzerare il profilo V2? I dati V1 non vengono toccati.", true, function(ok){ if(!ok) return; resetV2Profile(); refreshTutorPanel(); updateDevDashboard(); }, true); };
+  $("btn-show-json").onclick=function(){ $("tutor-json").value=JSON.stringify({profile:v2Profile,history:v2History,settings:v2Settings},null,2); };
+  $("btn-export-v2").onclick=exportV2;
+  $("btn-import-v2").onclick=importV2;
+  $("btn-selftest").onclick=v2RunSelfTest;
+
+  loadV2(); ensureAdaptiveProfile(); saveV2Profile(); updateMini(); updateLevelUI(); syncDevUI(); updateDevDashboard(); show("screen-menu");
+})();
+
+</script>
+</body></html>
