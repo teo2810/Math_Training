@@ -214,6 +214,18 @@ body,.card{background:#111113}
 .modal-actions{flex-wrap:wrap}
 .modal-actions .btn{flex:1;min-width:28%;font-size:.78rem;padding:0 6px}
 
+
+.tutor-box{margin-top:8px;background:#1c1c1e;color:#f2f2f7;border-radius:12px;padding:8px 10px}
+.tutor-box h3{font-size:.78rem;margin:0 0 6px;color:#fff}
+.tutor-live,.tutor-test-out,#tutor-json{width:100%;font-family:ui-monospace,Menlo,monospace;font-size:.62rem;line-height:1.35;white-space:pre-wrap;background:#111113;color:#e8e8ed;border-radius:8px;padding:8px;border:1px solid #3a3a3c}
+#tutor-json{min-height:90px}
+.tutor-row{font-size:.68rem;color:#d1d1d6;padding:2px 0;border-bottom:1px solid #2c2c2e}
+.tutor-actions{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.tutor-actions .btn{height:32px;font-size:.72rem;width:auto;flex:1 1 30%;padding:0 8px}
+
+.dev-panel{margin-top:8px}
+.chk{display:flex;align-items:center;gap:8px;font-size:.78rem;font-weight:600;color:#3a3a3c;margin-top:6px;text-transform:none}
+.chk input{width:16px;height:16px;accent-color:#5e5ce6}
 </style></head>
 <body>
 <div class="card" id="card">
@@ -244,7 +256,7 @@ body,.card{background:#111113}
 <button type="button" data-k=":">:</button><button type="button" data-k="0">0</button><button type="button" data-k="del">⌫</button>
 </div>
 <div class="pad-actions">
-<button class="btn btn-skip" id="btn-skip">Passa</button>
+<button class="btn btn-skip" id="btn-skip">Non lo so</button>
 <button class="btn btn-ok" id="btn-ok">Conferma</button>
 </div>
 </div></div>
@@ -276,7 +288,9 @@ Dopo un errore l’app mostra lo stesso calcolo scritto in un altro modo. Si pu�
 <p class="settings-info"><strong>Minuti</strong><br>
 Dopo questi minuti l’app chiede se continuare o fermarsi. Si può sempre uscire con «Per oggi basta».</p>
 <p class="settings-info"><strong>Tasti in basso</strong><br>
-Reset livello = solo il raggiunto. Reset report = solo lo storico. Reset tutto = nome, livello e report.</p>
+Reset livello = solo il raggiunto. Reset report = solo lo storico. Reset tutto = solo dati V1. Il profilo V2 ha un reset dedicato in Area tutor.</p>
+<p class="settings-info"><strong>V2 adattiva</strong><br>
+Le domande partono da addizioni e sottrazioni. L’app tiene traccia di cosa è stabile e cosa va ripassato. Il ragazzo vede solo la domanda. I dettagli stanno in Area tutor.</p>
 </div><p class="settings-info" id="scale-info"></p>
 <div class="level-set">
 <div class="gauges">
@@ -298,6 +312,38 @@ Reset livello = solo il raggiunto. Reset report = solo lo storico. Reset tutto =
 <div class="row"><button class="btn btn-danger" id="btn-reset-all">Reset tutto</button></div>
 
 </div>
+
+
+<button type="button" class="lock-btn off" id="btn-devmode">Modalità sviluppatore · tocca per aprire</button>
+<div class="dev-panel hidden" id="dev-panel">
+<p class="settings-info"><strong>Modalità sviluppatore</strong><br>
+Qui si accendono i pacchetti extra. A modalità chiusa il ragazzo fa solo addizioni e sottrazioni. Salva dopo aver cambiato.</p>
+<div id="dev-packs"></div>
+<div class="row" style="margin-top:8px">
+<button type="button" class="btn btn-soft" id="btn-packs-all">Tutti i pacchetti</button>
+<button type="button" class="btn btn-ghost" id="btn-packs-core">Solo add/sub</button>
+</div>
+</div>
+<div class="tutor-box hidden" id="tutor-box">
+<h3>Area tutor V2</h3>
+<p class="settings-info" style="background:#111113;color:#c7c7cc">Il ragazzo non usa questa sezione. Qui si vede come il motore sta scegliendo le domande.</p>
+<pre class="tutor-live" id="tutor-live">Nessuna domanda attiva.</pre>
+<div id="tutor-skills"></div>
+<div class="tutor-actions">
+<button type="button" class="btn btn-soft" id="btn-force-easy">Forza facile</button>
+<button type="button" class="btn btn-soft" id="btn-force-review">Forza ripasso</button>
+<button type="button" class="btn btn-soft" id="btn-force-new">Forza nuova</button>
+<button type="button" class="btn btn-ghost" id="btn-force-off">Forzatura off</button>
+<button type="button" class="btn btn-soft" id="btn-reset-skill">Reset competenza</button>
+<button type="button" class="btn btn-danger" id="btn-reset-v2">Reset profilo V2</button>
+<button type="button" class="btn btn-soft" id="btn-show-json">Vedi JSON</button>
+<button type="button" class="btn btn-soft" id="btn-export-v2">Esporta</button>
+<button type="button" class="btn btn-soft" id="btn-import-v2">Importa</button>
+<button type="button" class="btn" id="btn-selftest">Test motore</button>
+</div>
+<textarea id="tutor-json" placeholder="JSON profilo V2"></textarea>
+<pre class="tutor-test-out" id="tutor-test-out"></pre>
+</div>
 <div class="modal hidden" id="modal">
 <div class="modal-box">
 <p id="modal-text"></p>
@@ -311,286 +357,616 @@ Reset livello = solo il raggiunto. Reset report = solo lo storico. Reset tutto =
 (() => {
   const MAX_LEVEL=10, MIN_LEVEL=0;
   const LEVEL_INFO=[
-    {min:0,max:0,label:"Inizio",desc:"Solo addizioni piccole"},
+    {min:0,max:0,label:"Inizio",desc:"Addizioni piccole"},
     {min:1,max:2,label:"Base",desc:"Addizioni e sottrazioni"},
     {min:3,max:4,label:"Tempo",desc:"Orologio"},
-    {min:5,max:6,label:"Intermedio",desc:"Moltiplicazioni e frazioni"},
+    {min:5,max:6,label:"Intermedio",desc:"Moltiplicazioni"},
     {min:7,max:8,label:"Esperto",desc:"Divisioni"},
-    {min:9,max:9,label:"Ampio",desc:"Numeri piu alti"},
-    {min:10,max:10,label:"Adulto",desc:"Mix, soldi, percentuali"}
+    {min:9,max:9,label:"Ampio",desc:"Numeri più alti"},
+    {min:10,max:10,label:"Adulto",desc:"Mix quotidiano"}
   ];
   const levelInfo=lvl=>LEVEL_INFO.find(t=>lvl>=t.min&&lvl<=t.max)||LEVEL_INFO[LEVEL_INFO.length-1];
   const LS={
     get:function(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } },
-    set:function(k,v){ try{ localStorage.setItem(k,v); return true; }catch(e){ return false; } },
-    clear:function(){ try{ localStorage.clear(); }catch(e){} }
+    set:function(k,v){ try{ localStorage.setItem(k,v); return true; }catch(e){ return false; } }
   };
   document.addEventListener("touchstart",function(){},{passive:true});
   document.addEventListener("contextmenu",function(e){ var t=e.target; if(t&&(t.tagName==="INPUT"||t.tagName==="TEXTAREA")) return; e.preventDefault(); });
-  let NAME=LS.get("m_name")||"";
-  let TUTOR_NAME=LS.get("m_tutor_name")||"";
-  let TUTOR=LS.get("m_email")||"";
-  let cap=+LS.get("m_cap"); if(Number.isNaN(cap)||cap<MIN_LEVEL||cap>MAX_LEVEL) cap=MAX_LEVEL;
-  let locked=LS.get("m_lock")==="1";
-  let mins=+LS.get("m_mins")||2; if(mins<1||mins>10) mins=2;
+
+  var V2_KEYS={profile:"math_training_v2_profile",history:"math_training_v2_history",skills:"math_training_v2_skills",settings:"math_training_v2_settings"};
+  var V1_KEYS=["m_name","m_tutor_name","m_email","m_cap","m_lock","m_mins","m_reached","m_level","m_hist","m_sigs"];
+  var V2_CFG={
+    mix:{recovery:45,consolidate:25,maintain:20,novel:10},
+    masteryDelta:{autonomous:8,second_try:4,hinted:1,shown:-2,wrong:-5,unknown:-8},
+    srDays:[1,3,7,14,30,60],
+    recentExact:24,recentEquivalent:8,recentMicro:2,
+    minAttemptsAcquired:8,slowSec:12,unlockMastery:60,unlockSoftMastery:40,unlockSoftAttempts:6,maxHistory:400
+  };
+  var PACKS=["addition","subtraction","multiplication","division","clock","money","daily"];
+  var PACK_LABEL={addition:"Addizioni",subtraction:"Sottrazioni",multiplication:"Moltiplicazioni",division:"Divisioni",clock:"Orologio",money:"Denaro",daily:"Vita quotidiana"};
+  var MASTERY_BANDS=[
+    {max:20,id:"none",label:"non ancora allenata"},
+    {max:40,id:"emerging",label:"in avvio"},
+    {max:60,id:"unstable",label:"ancora instabile"},
+    {max:80,id:"consolidating",label:"in consolidamento"},
+    {max:95,id:"acquired",label:"solida"},
+    {max:100,id:"maintain",label:"da mantenere"}
+  ];
+  function masteryBand(m){ m=clamp(m,0,100); for(var i=0;i<MASTERY_BANDS.length;i++) if(m<=MASTERY_BANDS[i].max) return MASTERY_BANDS[i]; return MASTERY_BANDS[MASTERY_BANDS.length-1]; }
+  function clamp(n,a,b){ n=+n; if(isNaN(n)) n=a; return Math.max(a,Math.min(b,n)); }
+  function nowISO(){ return new Date().toISOString(); }
+  function daysFrom(iso){ if(!iso) return 999; return (Date.now()-new Date(iso).getTime())/864e5; }
+  function addDays(iso,d){ var t=iso?new Date(iso).getTime():Date.now(); return new Date(t+d*864e5).toISOString(); }
+  function v2LoadJSON(key, fb){ try{ var raw=LS.get(key); if(!raw) return fb; return JSON.parse(raw); }catch(e){ return fb; } }
+  function v2SaveJSON(key, val){ try{ return LS.set(key, JSON.stringify(val)); }catch(e){ return false; } }
+  function emptySkillState(){ return {mastery:0,attempts:0,correct:0,wrong:0,autonomousCorrect:0,assistedCorrect:0,hintsUsed:0,consecutiveCorrect:0,consecutiveWrong:0,averageResponseTime:0,lastSeen:null,nextReview:null,reviewInterval:0,srStep:0,lastOutcome:null,workingMax:null,recentWrong:0}; }
+  function emptyProfile(){ return {version:2,createdAt:nowISO(),updatedAt:nowISO(),skills:{},micros:{},lastSkillId:null,recentSigs:[],recentEq:[],recentMicros:[],forceMode:null}; }
+  function defaultPacks(){ return {addition:true,subtraction:true,multiplication:false,division:false,clock:false,money:false,daily:false}; }
+  function emptyV2Settings(){ return {name:"",tutorName:"",email:"",cap:MAX_LEVEL,locked:false,mins:2,devMode:false,packs:defaultPacks()}; }
+  var v2Profile=emptyProfile(), v2History=[], v2Settings=emptyV2Settings();
+  function ensureSkillState(id){ if(!v2Profile.skills[id]) v2Profile.skills[id]=emptySkillState(); return v2Profile.skills[id]; }
+  function ensureMicroState(id){ if(!v2Profile.micros[id]) v2Profile.micros[id]=emptySkillState(); return v2Profile.micros[id]; }
+
+  let NAME="", TUTOR_NAME="", TUTOR="";
+  let cap=MAX_LEVEL, locked=false, mins=2, devMode=false, packs=defaultPacks();
   const checkSec=()=>mins*60;
-  let reached=+LS.get("m_reached"); if(Number.isNaN(reached)) reached=+LS.get("m_level")||0;
-  let level=MIN_LEVEL;
-  let history=JSON.parse(LS.get("m_hist")||"[]");
-  let sigs=JSON.parse(LS.get("m_sigs")||"[]");
-  let session=[],cur=null,attempts=0,busy=false,qStart=0,checkTimer=null,sessionKind="add",replaceNext=false,winStreak=0;
+  let level=MIN_LEVEL, reached=MIN_LEVEL;
+  let session=[],cur=null,attempts=0,busy=false,qStart=0,checkTimer=null,replaceNext=false,hintLevel=0,hintsUsed=0;
   const $=id=>document.getElementById(id);
-  function resetTheme(){var top=document.querySelector('.pane-top'); if(top) top.classList.remove('tone-ok','tone-warn','tone-err');}
-  function theme(k){resetTheme(); var top=document.querySelector('.pane-top'); if(top&&k) top.classList.add('tone-'+k);}
-  const playLevel=()=>Math.max(MIN_LEVEL,Math.min(cap,level));
   const rand=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
-  function fillSettings(){
-    $("set-name").value=NAME||"";
-    $("set-tutor-name").value=TUTOR_NAME||"";
-    $("set-email").value=TUTOR||"";
-    syncSetSliders();
+
+  function normalizePacks(p){
+    var d=defaultPacks();
+    if(!p||typeof p!=="object") return d;
+    PACKS.forEach(function(k){ if(typeof p[k]==="boolean") d[k]=p[k]; });
+    if(!d.addition && !d.subtraction && !d.multiplication && !d.division && !d.clock && !d.money && !d.daily){ d.addition=true; d.subtraction=true; }
+    return d;
   }
-  function show(id){["screen-menu","screen-ex","screen-end","screen-set"].forEach(s=>$(s).classList.toggle("hidden",s!==id)); $("card").classList.toggle("is-ex",id==="screen-ex"); if(id==="screen-menu") updateMini(); if(id==="screen-set") fillSettings();}
+  function activePacks(){
+    if(!devMode) return {addition:true,subtraction:true,multiplication:false,division:false,clock:false,money:false,daily:false};
+    return normalizePacks(packs);
+  }
+  function packOn(cat){ return !!activePacks()[cat]; }
+
+  function loadV2(){
+    v2Profile=v2LoadJSON(V2_KEYS.profile, emptyProfile());
+    if(!v2Profile||v2Profile.version!==2) v2Profile=emptyProfile();
+    if(!v2Profile.skills) v2Profile.skills={};
+    if(!v2Profile.micros) v2Profile.micros={};
+    if(!v2Profile.recentSigs) v2Profile.recentSigs=[];
+    if(!v2Profile.recentEq) v2Profile.recentEq=[];
+    if(!v2Profile.recentMicros) v2Profile.recentMicros=[];
+    v2History=v2LoadJSON(V2_KEYS.history, []);
+    if(!Array.isArray(v2History)) v2History=[];
+    v2Settings=v2LoadJSON(V2_KEYS.settings, emptyV2Settings());
+    if(!v2Settings||typeof v2Settings!=="object") v2Settings=emptyV2Settings();
+    NAME=v2Settings.name||""; TUTOR_NAME=v2Settings.tutorName||""; TUTOR=v2Settings.email||"";
+    cap=clamp(v2Settings.cap,MIN_LEVEL,MAX_LEVEL); locked=!!v2Settings.locked; mins=clamp(v2Settings.mins,1,10);
+    devMode=!!v2Settings.devMode; packs=normalizePacks(v2Settings.packs);
+  }
+  function saveV2Profile(){ v2Profile.updatedAt=nowISO(); v2SaveJSON(V2_KEYS.profile, v2Profile); }
+  function saveV2History(){ v2SaveJSON(V2_KEYS.history, v2History.slice(-V2_CFG.maxHistory)); }
+  function saveV2Settings(){
+    v2Settings={name:NAME,tutorName:TUTOR_NAME,email:TUTOR,cap:cap,locked:locked,mins:mins,devMode:devMode,packs:normalizePacks(packs)};
+    v2SaveJSON(V2_KEYS.settings, v2Settings);
+  }
+  function resetV2Profile(){ v2Profile=emptyProfile(); v2History=[]; saveV2Profile(); saveV2History(); }
+  function clearV1KeysOnly(){ V1_KEYS.forEach(function(k){ try{ localStorage.removeItem(k); }catch(e){} }); }
+
+  var SKILLS=[
+    {id:"add_5",category:"addition",name:"Addizioni entro 5",difficulty:1,prerequisites:[],op:"+"},
+    {id:"add_10",category:"addition",name:"Addizioni entro 10",difficulty:2,prerequisites:["add_5"],op:"+"},
+    {id:"add_20",category:"addition",name:"Addizioni entro 20",difficulty:3,prerequisites:["add_10"],op:"+"},
+    {id:"add_carry",category:"addition",name:"Addizioni con riporto",difficulty:4,prerequisites:["add_10"],op:"+"},
+    {id:"add_2digit",category:"addition",name:"Addizioni a due cifre",difficulty:5,prerequisites:["add_20","add_carry"],op:"+"},
+    {id:"sub_5",category:"subtraction",name:"Sottrazioni entro 5",difficulty:1,prerequisites:[],op:"-"},
+    {id:"sub_10",category:"subtraction",name:"Sottrazioni entro 10",difficulty:2,prerequisites:["sub_5"],op:"-"},
+    {id:"sub_20",category:"subtraction",name:"Sottrazioni entro 20",difficulty:3,prerequisites:["sub_10"],op:"-"},
+    {id:"sub_borrow",category:"subtraction",name:"Sottrazioni con prestito",difficulty:4,prerequisites:["sub_10"],op:"-"},
+    {id:"sub_2digit",category:"subtraction",name:"Sottrazioni a due cifre",difficulty:5,prerequisites:["sub_20","sub_borrow"],op:"-"},
+    {id:"mul_2",category:"multiplication",name:"Tabellina del 2",difficulty:5,prerequisites:[],n:2},
+    {id:"mul_5",category:"multiplication",name:"Tabellina del 5",difficulty:5,prerequisites:[],n:5},
+    {id:"mul_10",category:"multiplication",name:"Tabellina del 10",difficulty:5,prerequisites:[],n:10},
+    {id:"mul_3",category:"multiplication",name:"Tabellina del 3",difficulty:6,prerequisites:["mul_2"],n:3},
+    {id:"mul_4",category:"multiplication",name:"Tabellina del 4",difficulty:6,prerequisites:["mul_2"],n:4},
+    {id:"mul_6",category:"multiplication",name:"Tabellina del 6",difficulty:7,prerequisites:["mul_3"],n:6},
+    {id:"mul_7",category:"multiplication",name:"Tabellina del 7",difficulty:7,prerequisites:["mul_2"],n:7},
+    {id:"mul_8",category:"multiplication",name:"Tabellina del 8",difficulty:8,prerequisites:["mul_4"],n:8},
+    {id:"mul_9",category:"multiplication",name:"Tabellina del 9",difficulty:8,prerequisites:["mul_3"],n:9},
+    {id:"mul_mixed",category:"multiplication",name:"Moltiplicazioni miste",difficulty:8,prerequisites:["mul_6","mul_7"]},
+    {id:"div_exact_small",category:"division",name:"Divisioni esatte piccole",difficulty:6,prerequisites:[]},
+    {id:"div_2",category:"division",name:"Divisioni per 2",difficulty:6,prerequisites:["div_exact_small"],n:2},
+    {id:"div_5",category:"division",name:"Divisioni per 5",difficulty:6,prerequisites:["div_exact_small"],n:5},
+    {id:"div_10",category:"division",name:"Divisioni per 10",difficulty:6,prerequisites:["div_exact_small"],n:10},
+    {id:"div_exact_medium",category:"division",name:"Divisioni esatte medie",difficulty:8,prerequisites:["div_2","div_5"]},
+    {id:"div_remainder",category:"division",name:"Divisioni con resto",difficulty:9,prerequisites:["div_exact_medium"]},
+    {id:"clock_hour",category:"clock",name:"Ore intere",difficulty:3,prerequisites:[]},
+    {id:"clock_half",category:"clock",name:"Ore e mezza",difficulty:4,prerequisites:["clock_hour"]},
+    {id:"clock_quarter",category:"clock",name:"Quarti d'ora",difficulty:5,prerequisites:["clock_half"]},
+    {id:"clock_5min",category:"clock",name:"Intervalli di 5 minuti",difficulty:6,prerequisites:["clock_quarter"]},
+    {id:"clock_minutes",category:"clock",name:"Minuti precisi",difficulty:7,prerequisites:["clock_5min"]},
+    {id:"clock_add_30",category:"clock",name:"Tra mezz'ora",difficulty:5,prerequisites:["clock_half"]},
+    {id:"clock_add_60",category:"clock",name:"Tra un'ora",difficulty:4,prerequisites:["clock_hour"]},
+    {id:"clock_sub_30",category:"clock",name:"Mezz'ora fa",difficulty:6,prerequisites:["clock_add_30"]},
+    {id:"clock_sub_60",category:"clock",name:"Un'ora fa",difficulty:5,prerequisites:["clock_add_60"]},
+    {id:"clock_interval",category:"clock",name:"Quanto tempo passa",difficulty:7,prerequisites:["clock_minutes"]},
+    {id:"clock_daily_context",category:"clock",name:"Orari della giornata",difficulty:6,prerequisites:["clock_hour"]},
+    {id:"money_recognize",category:"money",name:"Riconoscere monete",difficulty:3,prerequisites:[]},
+    {id:"money_sum",category:"money",name:"Somma di soldi",difficulty:4,prerequisites:["money_recognize"]},
+    {id:"money_compare",category:"money",name:"Confrontare importi",difficulty:4,prerequisites:["money_recognize"]},
+    {id:"money_total",category:"money",name:"Totale da pagare",difficulty:5,prerequisites:["money_sum"]},
+    {id:"money_change",category:"money",name:"Resto",difficulty:6,prerequisites:["money_total"]},
+    {id:"money_purchase",category:"money",name:"Acquisto semplice",difficulty:6,prerequisites:["money_change"]},
+    {id:"money_budget",category:"money",name:"Budget quotidiano",difficulty:8,prerequisites:["money_purchase"]},
+    {id:"time_sequence",category:"daily",name:"Sequenze temporali",difficulty:3,prerequisites:[]},
+    {id:"calendar_day",category:"daily",name:"Giorni della settimana",difficulty:3,prerequisites:[]},
+    {id:"calendar_date",category:"daily",name:"Date del calendario",difficulty:4,prerequisites:["calendar_day"]},
+    {id:"duration",category:"daily",name:"Durate",difficulty:5,prerequisites:["time_sequence"]},
+    {id:"quantity",category:"daily",name:"Quantità",difficulty:2,prerequisites:[]},
+    {id:"comparison",category:"daily",name:"Confronti",difficulty:3,prerequisites:["quantity"]},
+    {id:"simple_problem",category:"daily",name:"Problema semplice",difficulty:6,prerequisites:["add_20","sub_20"]},
+    {id:"real_life_problem",category:"daily",name:"Problema quotidiano",difficulty:8,prerequisites:["simple_problem"]}
+  ];
+  var SKILL_BY_ID={}; SKILLS.forEach(function(s){ SKILL_BY_ID[s.id]=s; });
+  function skillById(id){ return SKILL_BY_ID[id]; }
+  function implementedSkills(){ return SKILLS.filter(function(s){ return packOn(s.category); }); }
+  function skillUnlocked(skill){
+    if(!skill.prerequisites||!skill.prerequisites.length) return true;
+    return skill.prerequisites.every(function(pid){
+      var st=ensureSkillState(pid);
+      if(st.mastery>=V2_CFG.unlockMastery) return true;
+      if(st.attempts>=V2_CFG.unlockSoftAttempts && st.mastery>=V2_CFG.unlockSoftMastery) return true;
+      var prereq=skillById(pid);
+      if(prereq && !packOn(prereq.category)) return true;
+      return false;
+    });
+  }
+  function skillAllowedByCap(skill){
+    var maxDiff=cap<=0?1:cap<=2?3:cap<=4?5:cap<=6?7:10;
+    if(locked) maxDiff=Math.min(maxDiff, Math.max(1, cap<=2?3:Math.ceil(cap/2)+2));
+    return skill.difficulty<=maxDiff;
+  }
+
+  function hasCarry(a,b){ return (a%10)+(b%10)>=10; }
+  function hasBorrow(a,b){ return (a%10)<(b%10); }
+  function hhmm(h,m){ return String((h+24)%24).padStart(2,"0")+":"+String(((m%60)+60)%60).padStart(2,"0"); }
+  function clockAllowed(h,m){
+    var t=hhmm(h,m), h24=(h+24)%24, mm=((m%60)+60)%60;
+    var a=[t, h24+"."+String(mm).padStart(2,"0")];
+    if(mm===0){ a.push(String(h24), String(h24).padStart(2,"0")); var h12=h24%12; if(h12===0) h12=12; a.push(String(h12)); }
+    return a;
+  }
+  function itemBase(skill, text, target, allowed, hints, extra){
+    extra=extra||{};
+    return {
+      text:text, target:String(target), allowed:(allowed||[String(target)]).map(String),
+      cat:PACK_LABEL[skill.category]||skill.category,
+      hint:hints[0]||"", hints:hints,
+      a:extra.a||0, b:extra.b||0, op:extra.op||"",
+      kind:skill.category, skillId:skill.id,
+      microId:extra.micro||(skill.id+"|"+target),
+      sig:extra.sig||(skill.id+"|"+text),
+      eqSig:extra.eq||extra.micro||(skill.id+"|"+target),
+      structure:extra.structure||skill.id,
+      localDifficulty:extra.diff||skill.difficulty
+    };
+  }
+
+  function genAddSub(skill){
+    var a=1,b=1,tries=0;
+    while(tries++<80){
+      if(skill.id==="add_5"){ a=rand(1,4); b=rand(1,5-a); }
+      else if(skill.id==="add_10"){ a=rand(1,9); b=rand(1,Math.max(1,10-a)); if(a+b<=5&&Math.random()<0.7) continue; }
+      else if(skill.id==="add_20"){ a=rand(2,15); b=rand(1,Math.max(1,20-a)); if(a+b<=10&&Math.random()<0.65) continue; }
+      else if(skill.id==="add_carry"){ var x=rand(1,9), y=rand(10-x,9); a=rand(0,1)*10+x; b=rand(0,1)*10+y; if(!hasCarry(a,b)) continue; }
+      else if(skill.id==="add_2digit"){ a=rand(10,40); b=rand(10,40); }
+      else if(skill.id==="sub_5"){ a=rand(2,5); b=rand(1,a); }
+      else if(skill.id==="sub_10"){ a=rand(3,10); b=rand(1,a); if(a<=5&&Math.random()<0.6) continue; }
+      else if(skill.id==="sub_20"){ a=rand(6,20); b=rand(1,a); if(a<=10&&Math.random()<0.6) continue; }
+      else if(skill.id==="sub_borrow"){ var ones=rand(0,8), subOnes=rand(ones+1,9); a=rand(1,2)*10+ones; b=rand(0,Math.floor(a/10))*10+subOnes; if(b>=a||!hasBorrow(a,b)) continue; }
+      else if(skill.id==="sub_2digit"){ a=rand(15,40); b=rand(10,a-1); }
+      else return null;
+      if(skill.op==="-"&&b>=a) continue;
+      var target=skill.op==="+"?a+b:a-b;
+      var op=skill.op;
+      var hints=op==="+"?[a+" e ancora "+b,"Parti da "+a+" e conta "+b+" in più",a+" + "+b+" = "+target]:["Da "+b+" quanto manca a "+a,"Parti da "+a+" e togli "+b,a+" − "+b+" = "+target];
+      return itemBase(skill, a+" "+op+" "+b+" = ?", target, [String(target)], hints, {
+        a:a,b:b,op:op,micro:(op==="+"?op+"|"+Math.min(a,b)+"|"+Math.max(a,b):op+"|"+a+"|"+b),
+        sig:op+"|"+a+"|"+b, structure:op==="+"?(hasCarry(a,b)?"add_carry":"add_plain"):(hasBorrow(a,b)?"sub_borrow":"sub_plain")
+      });
+    }
+    return itemBase(skill,"2 + 2 = ?",4,["4"],["2 e ancora 2","2 + 2 = 4"],{a:2,b:2,op:"+"});
+  }
+  function genMul(skill){
+    var a,b;
+    if(skill.id==="mul_mixed"){ a=rand(2,9); b=rand(2,9); }
+    else { a=skill.n||2; b=rand(2,10); if(Math.random()<0.5){ var t=a; a=b; b=t; } }
+    var target=a*b;
+    return itemBase(skill, a+" x "+b+" = ?", target, [String(target)], [a+" per "+b, "Somma "+a+" per "+b+" volte", a+" x "+b+" = "+target], {a:a,b:b,op:"*",micro:"*|"+Math.min(a,b)+"|"+Math.max(a,b),sig:"*|"+a+"|"+b});
+  }
+  function genDiv(skill){
+    var b,res,a,r=0;
+    if(skill.id==="div_remainder"){
+      b=rand(3,9); res=rand(2,8); r=rand(1,b-1); a=b*res+r;
+      return itemBase(skill, a+" : "+b+" resto = ?", r, [String(r)], ["Quante volte sta "+b+" in "+a+", poi il resto", b+" x "+res+" = "+(b*res)+", avanza "+r, "Resto "+r], {a:a,b:b,op:"/",micro:"%/|"+a+"|"+b,structure:"div_rem"});
+    }
+    if(skill.n){ b=skill.n; res=rand(2,10); }
+    else if(skill.id==="div_exact_medium"){ b=rand(3,9); res=rand(6,12); }
+    else { b=rand(2,5); res=rand(2,6); }
+    a=b*res;
+    return itemBase(skill, a+" : "+b+" = ?", res, [String(res)], [b+" x ? = "+a, "Quante volte sta "+b+" in "+a, a+" : "+b+" = "+res], {a:a,b:b,op:"/",micro:"/|"+a+"|"+b});
+  }
+  function genClock(skill){
+    var h,m,nh,nm,delta=0,text,hints;
+    if(skill.id==="clock_hour"){ h=rand(8,18); m=0; delta=rand(1,3)*60; }
+    else if(skill.id==="clock_half"){ h=rand(8,18); m=Math.random()<0.5?0:30; delta=30; }
+    else if(skill.id==="clock_quarter"){ h=rand(8,18); m=[0,15,30,45][rand(0,3)]; delta=15; }
+    else if(skill.id==="clock_5min"){ h=rand(8,18); m=rand(0,11)*5; delta=5; }
+    else if(skill.id==="clock_minutes"){ h=rand(8,18); m=rand(0,59); delta=rand(3,20); }
+    else if(skill.id==="clock_add_30"){ h=rand(8,18); m=Math.random()<0.5?0:30; delta=30; }
+    else if(skill.id==="clock_add_60"){ h=rand(8,18); m=0; delta=60; }
+    else if(skill.id==="clock_sub_30"){ h=rand(8,18); m=Math.random()<0.5?0:30; delta=-30; }
+    else if(skill.id==="clock_sub_60"){ h=rand(9,18); m=0; delta=-60; }
+    else if(skill.id==="clock_interval"){
+      h=rand(8,16); m=[0,15,30][rand(0,2)]; var h2=h+rand(1,3); var m2=[0,15,30][rand(0,2)];
+      var mins=((h2*60+m2)-(h*60+m));
+      return itemBase(skill, "Dalle "+hhmm(h,m)+" alle "+hhmm(h2,m2)+" passano ? minuti", mins, [String(mins)], ["Conta le ore e i minuti","Da "+hhmm(h,m)+" a "+hhmm(h2,m2), mins+" minuti"], {structure:"interval"});
+    }
+    else {
+      var ctx=[{n:"colazione",h:8},{n:"pranzo",h:13},{n:"merenda",h:16},{n:"cena",h:20}][rand(0,3)];
+      delta=[30,60][rand(0,1)]; h=ctx.h; m=0;
+      text="È l'ora di "+ctx.n+" ("+hhmm(h,m)+"). Tra "+(delta===60?"1 ora":"mezz'ora")+" che ora sarà?";
+      nh=h+Math.floor(delta/60); nm=m+(delta%60); if(nm>=60){ nh++; nm-=60; }
+      return itemBase(skill, text, hhmm(nh,nm), clockAllowed(nh,nm), ["Parti da "+hhmm(h,m),"Aggiungi "+(delta===60?"un'ora":"30 minuti"), hhmm(nh,nm)], {structure:"daily_clock"});
+    }
+    var start=hhmm(h,m);
+    var tot=h*60+m+delta; if(tot<0) tot+=24*60;
+    nh=Math.floor(tot/60)%24; nm=tot%60;
+    var lab=delta<0?(delta===-60?"un'ora fa":"mezz'ora fa"):(delta===60?"1 ora":delta===30?"mezz'ora":delta+" minuti");
+    text=delta<0?("Sono le "+start+". "+(delta===-60?"Un'ora fa":"Mezz'ora fa")+" che ora era?"):("Sono le "+start+". Tra "+lab+", che ora sarà?");
+    hints=["Parti da "+start, (delta<0?"Togli ":"Aggiungi ")+lab, hhmm(nh,nm)];
+    return itemBase(skill, text, hhmm(nh,nm), clockAllowed(nh,nm), hints, {structure:skill.id,sig:skill.id+"|"+start+"|"+delta});
+  }
+  function genMoney(skill){
+    var coins=[1,2,5,10];
+    if(skill.id==="money_recognize"){ var c=coins[rand(0,3)]; return itemBase(skill,"Una moneta da "+c+" euro. Valore?",c,[String(c)],["Guarda il numero sulla moneta","Vale "+c+" euro"],{micro:"coin|"+c}); }
+    if(skill.id==="money_sum"){ var x=coins[rand(0,2)], y=coins[rand(0,2)]; return itemBase(skill,x+" euro + "+y+" euro = ?",x+y,[String(x+y)],[x+" e ancora "+y, String(x+y)+" euro"],{a:x,b:y,op:"+"}); }
+    if(skill.id==="money_compare"){ var p=rand(2,9), q=rand(1,p-1); return itemBase(skill,p+" euro e "+q+" euro. Quanti euro in più il primo?",p-q,[String(p-q)],["Togli il più piccolo dal più grande", (p-q)+" euro"],{a:p,b:q,op:"-"}); }
+    if(skill.id==="money_total"){ var n=rand(2,4), price=rand(2,5); return itemBase(skill,n+" cose da "+price+" euro. Totale?",n*price,[String(n*price)],[price+" per "+n+" volte", String(n*price)+" euro"],{a:n,b:price,op:"*"}); }
+    if(skill.id==="money_change"){ var pay=[10,20][rand(0,1)], cost=rand(3,pay-1); return itemBase(skill,"Costa "+cost+" euro. Pago "+pay+". Resto?",pay-cost,[String(pay-cost)],["Da "+cost+" a "+pay, String(pay-cost)+" euro"],{a:pay,b:cost,op:"-"}); }
+    if(skill.id==="money_purchase"){ var a=rand(2,6), b=rand(2,6), pay=20; var tot=a+b; return itemBase(skill,"Due cose: "+a+" e "+b+" euro. Pago 20. Resto?",pay-tot,[String(pay-tot)],["Prima "+a+"+"+b+" = "+tot,"Poi 20 − "+tot, String(pay-tot)+" euro"],{structure:"purchase"}); }
+    var budget=rand(8,15), spent=rand(2,budget-1); return itemBase(skill,"Ho "+budget+" euro. Spendo "+spent+". Rimangono?",budget-spent,[String(budget-spent)],["Togli "+spent+" da "+budget, String(budget-spent)+" euro"],{a:budget,b:spent,op:"-"});
+  }
+  function genDaily(skill){
+    if(skill.id==="time_sequence"){ var h1=rand(7,16); var add=rand(1,3); return itemBase(skill,"Sono le "+h1+". Tra "+add+" ore che ora è? (solo ora)",(h1+add)%24,[String((h1+add)%24),hhmm((h1+add)%24,0)],["Aggiungi "+add+" ore", String((h1+add)%24)],{structure:"seq"}); }
+    if(skill.id==="calendar_day"){
+      var days=["lunedì","martedì","mercoledì","giovedì","venerdì","sabato","domenica"];
+      var i=rand(0,6), add=rand(1,3), j=(i+add)%7;
+      return itemBase(skill, days[i]+" + "+add+" giorni. Che giorno? (1 lun … 7 dom)", j+1, [String(j+1)], ["Conta "+add+" giorni dopo "+days[i], days[j]+" = "+(j+1)], {micro:"dow|"+i+"|"+add});
+    }
+    if(skill.id==="calendar_date"){ var d=rand(5,20), add=rand(1,5); return itemBase(skill,"Oggi è il "+d+". Tra "+add+" giorni?",d+add,[String(d+add)],["Aggiungi "+add+" al "+d, String(d+add)],{a:d,b:add,op:"+"}); }
+    if(skill.id==="duration"){ var h=rand(1,4); return itemBase(skill,h+" ore = ? minuti",h*60,[String(h*60)],["1 ora = 60 minuti", String(h*60)],{a:h,op:"h"}); }
+    if(skill.id==="quantity"){ var n=rand(2,5), q=rand(2,6); return itemBase(skill,n+" gruppi da "+q+". Totale?",n*q,[String(n*q)],[n+" per "+q, String(n*q)],{a:n,b:q,op:"*"}); }
+    if(skill.id==="comparison"){ var a=rand(6,20), b=rand(1,a-1); return itemBase(skill,a+" è più grande di "+b+" di quanto?",a-b,[String(a-b)],[a+" − "+b, String(a-b)],{a:a,b:b,op:"-"}); }
+    if(skill.id==="simple_problem"){ var a=rand(4,12), b=rand(2,8); if(Math.random()<0.5) return itemBase(skill,"Ho "+a+" mele. Ne prendo "+b+". Totale?",a+b,[String(a+b)],[a+" + "+b, String(a+b)],{a:a,b:b,op:"+"}); return itemBase(skill,"Ho "+(a+b)+" caramelle. Ne do "+b+". Restano?",a,[String(a)],[(a+b)+" − "+b, String(a)],{a:a+b,b:b,op:"-"}); }
+    var price=rand(2,6), n=rand(2,4), pay=20; return itemBase(skill,"Compro "+n+" cose da "+price+" euro. Pago 20. Resto?",pay-n*price,[String(pay-n*price)],["Prima "+n+" x "+price+" = "+(n*price),"Poi 20 − "+(n*price), String(pay-n*price)],{structure:"real"});
+  }
+  function generateForSkill(skill, avoid){
+    avoid=avoid||{};
+    var tries=0, best=null;
+    while(tries++<50){
+      var item=null;
+      if(skill.category==="addition"||skill.category==="subtraction") item=genAddSub(skill);
+      else if(skill.category==="multiplication") item=genMul(skill);
+      else if(skill.category==="division") item=genDiv(skill);
+      else if(skill.category==="clock") item=genClock(skill);
+      else if(skill.category==="money") item=genMoney(skill);
+      else item=genDaily(skill);
+      if(!item) break;
+      if(avoid.sigs && avoid.sigs.indexOf(item.sig)>=0) continue;
+      if(avoid.eq && avoid.eq.indexOf(item.eqSig)>=0 && tries<30) continue;
+      if(avoid.micros && avoid.micros.indexOf(item.microId)>=0 && tries<20) continue;
+      best=item; break;
+    }
+    return best||genAddSub(skillById("add_5"));
+  }
+
+  function classifySkill(skill, st){
+    var overdue=st.nextReview && new Date(st.nextReview).getTime()<=Date.now();
+    if(st.attempts<3 && skillUnlocked(skill)) return "novel";
+    if(st.mastery<=40 || st.consecutiveWrong>0 || st.recentWrong>=2) return "recovery";
+    if(st.mastery<=80) return "consolidate";
+    if(overdue || st.mastery>=81) return "maintain";
+    return "consolidate";
+  }
+  function priorityScore(skill, st){
+    var score=10;
+    score += (100-st.mastery)*0.45;
+    if(st.consecutiveWrong>0) score += 18*st.consecutiveWrong;
+    if(st.recentWrong>0) score += 10*st.recentWrong;
+    if(st.lastSeen) score += Math.min(25, daysFrom(st.lastSeen)*3); else score += 20;
+    if(st.nextReview && new Date(st.nextReview).getTime()<=Date.now()) score += 16 + Math.min(20, daysFrom(st.nextReview)*2);
+    if(st.averageResponseTime>=V2_CFG.slowSec) score += 8;
+    if(st.attempts && st.hintsUsed/Math.max(1,st.attempts)>0.4) score += 10;
+    if(masteryBand(st.mastery).id==="unstable") score += 12;
+    if(v2Profile.lastSkillId===skill.id) score -= 16;
+    if(st.lastSeen && daysFrom(st.lastSeen)<0.01) score -= 12;
+    if(st.mastery>=81 && st.consecutiveCorrect>=3) score -= 14;
+    score += Math.random()*8;
+    return score;
+  }
+  function pickBucket(){
+    if(v2Profile.forceMode==="easy") return "recovery";
+    if(v2Profile.forceMode==="review") return "maintain";
+    if(v2Profile.forceMode==="novel") return "novel";
+    var r=Math.random()*100, m=V2_CFG.mix;
+    if(r<m.recovery) return "recovery";
+    if(r<m.recovery+m.consolidate) return "consolidate";
+    if(r<m.recovery+m.consolidate+m.maintain) return "maintain";
+    return "novel";
+  }
+  function selectSkill(){
+    var pool=implementedSkills().filter(function(s){ return skillAllowedByCap(s) && skillUnlocked(s); });
+    if(!pool.length) pool=implementedSkills().filter(function(s){ return s.difficulty<=1; });
+    if(!pool.length) pool=SKILLS.filter(function(s){ return s.id==="add_5"||s.id==="sub_5"; });
+    var bucket=pickBucket(), order=[bucket,"recovery","consolidate","maintain","novel"], seen={};
+    for(var i=0;i<order.length;i++){
+      var b=order[i]; if(seen[b]) continue; seen[b]=1;
+      var cand=pool.filter(function(s){ return classifySkill(s, ensureSkillState(s.id))===b; });
+      if(!cand.length) continue;
+      cand.sort(function(a,c){ return priorityScore(c,ensureSkillState(c.id))-priorityScore(a,ensureSkillState(a.id)); });
+      var top=cand.slice(0, Math.max(2, Math.min(4, cand.length)));
+      return top[rand(0, top.length-1)];
+    }
+    return pool[rand(0, pool.length-1)];
+  }
+  function selectQuestion(){
+    var skill=selectSkill();
+    var item=generateForSkill(skill, {sigs:v2Profile.recentSigs.slice(-V2_CFG.recentExact),eq:v2Profile.recentEq.slice(-V2_CFG.recentEquivalent),micros:v2Profile.recentMicros.slice(-V2_CFG.recentMicro)});
+    v2Profile.lastSkillId=skill.id;
+    return item;
+  }
+
+  function applyDelta(st, delta, sec, outcome, hintsN){
+    st.attempts++; st.lastSeen=nowISO(); st.lastOutcome=outcome; st.hintsUsed += hintsN||0;
+    st.averageResponseTime = st.attempts===1 ? sec : Math.round(((st.averageResponseTime*(st.attempts-1))+sec)*10/st.attempts)/10;
+    if(outcome==="autonomous"||outcome==="second_try"||outcome==="hinted"){
+      st.correct++; st.consecutiveCorrect++; st.consecutiveWrong=0; st.recentWrong=Math.max(0,(st.recentWrong||0)-1);
+      if(outcome==="autonomous") st.autonomousCorrect++; else st.assistedCorrect++;
+    } else { st.wrong++; st.consecutiveWrong++; st.consecutiveCorrect=0; st.recentWrong=(st.recentWrong||0)+1; }
+    st.mastery=clamp(st.mastery+delta,0,100);
+  }
+  function updateSpacedRepetition(st, okAuto){
+    if(okAuto && st.mastery>=61 && st.attempts>=3){ st.srStep=Math.min(V2_CFG.srDays.length-1,(st.srStep||0)+1); st.reviewInterval=V2_CFG.srDays[st.srStep]; st.nextReview=addDays(nowISO(), st.reviewInterval); }
+    else if(!okAuto){ st.srStep=Math.max(0,(st.srStep||0)-1); st.reviewInterval=V2_CFG.srDays[st.srStep]; st.nextReview=addDays(nowISO(), st.reviewInterval||1); }
+  }
+  function evaluateOutcome(ok, attempts, hintsN, unknown, shown){
+    if(unknown) return "unknown"; if(shown) return "shown"; if(!ok) return "wrong"; if(hintsN>0) return "hinted"; if(attempts===1) return "autonomous"; return "second_try";
+  }
+  function learnFromItem(item, user, ok, sec, attempts, hintsN, unknown, shown){
+    var outcome=evaluateOutcome(ok, attempts, hintsN, unknown, shown);
+    var delta=V2_CFG.masteryDelta[outcome]; if(typeof delta!=="number") delta=0;
+    var st=ensureSkillState(item.skillId), micro=ensureMicroState(item.microId);
+    applyDelta(st, delta, sec, outcome, hintsN); applyDelta(micro, delta, sec, outcome, hintsN);
+    updateSpacedRepetition(st, outcome==="autonomous"); updateSpacedRepetition(micro, outcome==="autonomous");
+    v2Profile.recentSigs.push(item.sig); if(v2Profile.recentSigs.length>60) v2Profile.recentSigs.shift();
+    v2Profile.recentEq.push(item.eqSig); if(v2Profile.recentEq.length>40) v2Profile.recentEq.shift();
+    v2Profile.recentMicros.push(item.microId); if(v2Profile.recentMicros.length>20) v2Profile.recentMicros.shift();
+    var rec={ts:nowISO(),skillId:item.skillId,microId:item.microId,sig:item.sig,eqSig:item.eqSig,structure:item.structure,q:item.text,user:user,correct:item.target,ok:!!ok,sec:sec,att:attempts,hintsUsed:hintsN||0,hintLevel:item.hintLevel||0,outcome:outcome,autonomous:outcome==="autonomous",masteryAfter:st.mastery};
+    v2History.push(rec); saveV2Profile(); saveV2History(); return rec;
+  }
+
+  function skillSnapshot(){
+    return implementedSkills().map(function(s){ var st=ensureSkillState(s.id); return {skill:s,st:st,band:masteryBand(st.mastery),priority:Math.round(priorityScore(s,st)),bucket:classifySkill(s,st)}; });
+  }
+  function parentReportLines(){
+    var rows=skillSnapshot();
+    var acquired=rows.filter(function(r){ return r.st.attempts>=V2_CFG.minAttemptsAcquired && r.st.mastery>=81; });
+    var unstable=rows.filter(function(r){ return r.st.attempts>0 && r.st.mastery<=60; });
+    var review=rows.filter(function(r){ return r.st.nextReview && new Date(r.st.nextReview).getTime()<=Date.now(); });
+    var recent=v2History.slice(-12);
+    var lines=["Allenamento osservato (non è una valutazione clinica)."];
+    lines.push("Competenze più solide: "+(acquired.map(function(r){return r.skill.name;}).join(", ")||"ancora nessuna con abbastanza prove"));
+    lines.push("Da rinforzare: "+(unstable.map(function(r){return r.skill.name;}).join(", ")||"nessuna evidenza recente"));
+    lines.push("Da ripassare: "+(review.map(function(r){return r.skill.name;}).join(", ")||"nessuna in scadenza"));
+    var errs=recent.filter(function(x){ return !x.ok; });
+    lines.push("Errori recenti: "+(errs.map(function(x){return x.q+" → "+x.user;}).join("; ")||"nessuno in questa finestra"));
+    lines.push("Aiuti usati (ultime domande): "+recent.reduce(function(a,x){return a+(x.hintsUsed||0);},0));
+    var timed=recent.filter(function(x){return x.sec;});
+    var avg=timed.length?Math.round(timed.reduce(function(a,x){return a+x.sec;},0)/timed.length):0;
+    lines.push("Tempo medio recente: "+(avg?avg+"s":"—"));
+    return lines;
+  }
+
+  function resetTheme(){ var top=document.querySelector('.pane-top'); if(top) top.classList.remove('tone-ok','tone-warn','tone-err'); }
+  function theme(k){ resetTheme(); var top=document.querySelector('.pane-top'); if(top&&k) top.classList.add('tone-'+k); }
+  function derivedLevel(){
+    var used=implementedSkills().map(function(s){ return ensureSkillState(s.id); }).filter(function(s){ return s.attempts>0; });
+    if(!used.length) return MIN_LEVEL;
+    return clamp(Math.round(used.reduce(function(a,s){return a+s.mastery;},0)/used.length/10), MIN_LEVEL, cap);
+  }
+  function show(id){ ["screen-menu","screen-ex","screen-end","screen-set"].forEach(function(s){ $(s).classList.toggle("hidden",s!==id); }); $("card").classList.toggle("is-ex",id==="screen-ex"); if(id==="screen-menu") updateMini(); if(id==="screen-set") fillSettings(); }
   function updateMini(){
     $("coach-text").textContent=NAME?("Ciao "+NAME+"! Pronto a giocare?"):"Ciao! Pronto a giocare?";
     var hint=$("menu-hint");
     if(hint) hint.textContent="Puoi fermarti quando vuoi con «Per oggi basta»: ogni "+mins+" minut"+(mins===1?"o":"i")+" te lo chiederò anch’io.";
   }
-  function updateLevelUI(){/* barre rimosse: non distrarre */}
-  function getAns(){const el=$("ans"); return el.classList.contains("empty")?"":(el.textContent||"").trim();}
-  function setAns(v){const el=$("ans"); if(!v){el.textContent="Risposta";el.classList.add("empty");}else{el.textContent=v;el.classList.remove("empty");}}
-  function gaugeColor(v){return v<=3?"#34c759":v<=7?"#ff9f0a":"#ff3b30";}
-  function needle(val,color){const t=val/MAX_LEVEL,a=Math.PI*(1+t); return "<line x1='50' y1='50' x2='"+(50+36*Math.cos(a))+"' y2='"+(50+36*Math.sin(a))+"' stroke='"+color+"' stroke-width='3' stroke-linecap='round'/>";}
-  function drawGauge(id,val,ghost){
+  function updateLevelUI(){ level=derivedLevel(); if(level>reached) reached=level; }
+  function getAns(){ const el=$("ans"); return el.classList.contains("empty")?"":(el.textContent||"").trim(); }
+  function setAns(v){ const el=$("ans"); if(!v){ el.textContent="Risposta"; el.classList.add("empty"); } else { el.textContent=v; el.classList.remove("empty"); } }
+  function gaugeColor(v){ return v<=3?"#34c759":v<=7?"#ff9f0a":"#ff3b30"; }
+  function needle(val,color){ const t=val/MAX_LEVEL,a=Math.PI*(1+t); return "<line x1='50' y1='50' x2='"+(50+36*Math.cos(a))+"' y2='"+(50+36*Math.sin(a))+"' stroke='"+color+"' stroke-width='3' stroke-linecap='round'/>"; }
+  function drawGauge(id,val){
     const el=$(id); if(!el) return;
     const t=val/MAX_LEVEL,col=gaugeColor(val);
-    let html="<path d='M14 50 A36 36 0 0 1 86 50' fill='none' stroke='#e5e5ea' stroke-width='10' stroke-linecap='round'/>"+
-      "<path d='M14 50 A36 36 0 0 1 86 50' fill='none' stroke='"+col+"' stroke-width='10' stroke-linecap='round' stroke-dasharray='"+(t*113)+" 113'/>";
-    if(ghost!=null&&ghost!==val) html+=needle(ghost,"#c7c7cc");
-    el.innerHTML=html+needle(val,"#3a3a3c")+"<circle cx='50' cy='50' r='4' fill='#3a3a3c'/>";
+    el.innerHTML="<path d='M14 50 A36 36 0 0 1 86 50' fill='none' stroke='#e5e5ea' stroke-width='10' stroke-linecap='round'/>"+"<path d='M14 50 A36 36 0 0 1 86 50' fill='none' stroke='"+col+"' stroke-width='10' stroke-linecap='round' stroke-dasharray='"+(t*113)+" 113'/>"+needle(val,"#3a3a3c")+"<circle cx='50' cy='50' r='4' fill='#3a3a3c'/>";
   }
-  function syncLockBtn(){
-    var b=$("set-lock");
-    if(!b) return;
-    b.className="lock-btn "+(locked?"on":"off");
-    b.textContent=locked?"Tetto bloccato a "+cap+" · tocca per sbloccare":"Tetto aperto a "+cap+" · tocca per bloccare";
+  function syncLockBtn(){ var b=$("set-lock"); if(!b) return; b.className="lock-btn "+(locked?"on":"off"); b.textContent=locked?"Tetto bloccato a "+cap+" · tocca per sbloccare":"Tetto aperto a "+cap+" · tocca per bloccare"; }
+  function syncDevUI(){
+    var btn=$("btn-devmode");
+    if(btn){ btn.className="lock-btn "+(devMode?"on":"off"); btn.textContent=devMode?"Modalità sviluppatore ON · tocca per chiudere":"Modalità sviluppatore · tocca per aprire"; }
+    var pan=$("dev-panel"); if(pan) pan.classList.toggle("hidden", !devMode);
+    var tb=$("tutor-box"); if(tb) tb.classList.toggle("hidden", !devMode);
+    var box=$("dev-packs");
+    if(box){
+      box.innerHTML=PACKS.map(function(k){
+        return "<label class='chk'><input type='checkbox' data-pack='"+k+"'"+(packs[k]?" checked":"")+"> "+PACK_LABEL[k]+"</label>";
+      }).join("");
+      box.querySelectorAll("input[data-pack]").forEach(function(inp){
+        inp.onchange=function(){ packs[inp.getAttribute("data-pack")]=inp.checked; packs=normalizePacks(packs); };
+      });
+    }
   }
   function syncSetSliders(){
     $("set-cap").value=String(cap); $("set-cap-num").textContent=cap+"/"+MAX_LEVEL;
     syncLockBtn(); $("set-mins").value=String(mins); $("set-mins-num").textContent=mins+" min";
-    const li=levelInfo(cap); $("set-level-desc").textContent=li.label+" — "+li.desc;
-    $("g-now-val").textContent=String(reached); $("g-cap-val").textContent=String(cap);
-    drawGauge("g-now",Math.min(reached,cap),reached>cap?reached:null); drawGauge("g-cap",cap,null);
+    const li=levelInfo(cap); $("set-level-desc").textContent=li.label+" — "+li.desc+" · in V2 il tetto limita le competenze nuove.";
+    $("g-now-val").textContent=String(derivedLevel()); $("g-cap-val").textContent=String(cap);
+    drawGauge("g-now",Math.min(derivedLevel(),cap)); drawGauge("g-cap",cap);
+    syncDevUI();
   }
-  function kindFor(lvl){
-    if(lvl<=0) return "add";
-    if(lvl<=2) return Math.random()<.5?"add":"sub";
-    if(lvl<=4) return "time";
-    if(lvl<=6) return Math.random()<.5?"mul":"frac";
-    if(lvl<=8) return "div";
-    if(lvl===9) return ["add","sub","mul","div"][rand(0,3)];
-    return ["mul","div","pct","triple","money","time"][rand(0,5)];
-  }
-  function build(lvl){
-    const type=sessionKind;
-    let text="",target="",allowed=[],cat="",hint="",a=0,b=0,op="+";
-    const hi=lvl===0?6:lvl<=2?12:lvl<=8?24+lvl*3:160;
-    if(type==="add"||type==="sub"||type==="mul"){
-      cat="Aritmetica"; op=type==="sub"?"-":type==="mul"?"*":"+";
-      if(op==="+"){a=rand(1,hi);b=rand(1,hi);target=String(a+b);hint=a+" e ancora "+b;}
-      else if(op==="-"){a=rand(3,Math.max(4,hi));b=rand(1,a);target=String(a-b);hint="da "+b+" quanto manca a "+a;}
-      else{a=rand(2,lvl>=9?19:Math.min(12,2+lvl));b=rand(2,lvl>=9?12:Math.min(9,2+Math.floor(lvl/2)));target=String(a*b);hint=a+" per "+b;}
-      text=a+" "+(op==="*"?"x":op)+" "+b+" = ?"; allowed=[target];
-    } else if(type==="frac"){
-      cat="Frazioni"; const fracs=[{n:"la meta di",d:2},{n:"un terzo di",d:3},{n:"un quarto di",d:4}];
-      const f=fracs[rand(0,Math.min(2,Math.max(0,lvl-5)))]; const base=rand(1,2+lvl)*f.d;
-      text="Quanto e "+f.n+" "+base+"?"; target=String(base/f.d); allowed=[target]; hint=base+" spezzato in "+f.d+" parti uguali";
-    } else if(type==="div"){
-      cat="Divisioni"; b=rand(2,9); const res=rand(2,8); a=b*res;
-      text=a+" : "+b+" = ?"; target=String(res); allowed=[target]; hint=b+" x ? = "+a; op="/";
-    } else if(type==="pct"){
-      cat="Percentuali"; const p=[10,20,25,50][rand(0,3)], base=rand(2,12)*10;
-      target=String(Math.round(base*p/100)); text=p+"% di "+base+" = ?"; allowed=[target]; hint=p+"% e "+p+"/100 di "+base;
-    } else if(type==="triple"){
-      cat="Tre termini"; a=rand(10,80); b=rand(10,80); const c=rand(2,20);
-      if(Math.random()<.5){target=String(a+b-c);text=a+" + "+b+" - "+c+" = ?";hint="prima "+a+"+"+b+", poi togli "+c;}
-      else{target=String(a-c+b);text=a+" - "+c+" + "+b+" = ?";hint="prima "+a+"-"+c+", poi aggiungi "+b;}
-      allowed=[target];
-    } else if(type==="money"){
-      cat="Soldi"; a=[1,2,3,5][rand(0,3)]; b=rand(2,4);
-      target=String(a*b); text=b+" cose da "+a+" euro. Totale?"; allowed=[target]; hint=a+" per "+b+" volte"; op="E";
-    } else {
-      cat="Orologio"; const h=rand(8,18), m=Math.random()>.55?30:0, addH=rand(0,2), addM=Math.random()>.5?30:(addH===0?30:0);
-      const start=String(h).padStart(2,"0")+":"+String(m).padStart(2,"0");
-      const tot=h*60+m+addH*60+addM, fh=Math.floor(tot/60)%24, fm=tot%60;
-      target=String(fh).padStart(2,"0")+":"+String(fm).padStart(2,"0");
-      const delta=addH&&!addM?(addH===1?"1 ora":addH+" ore"):addH&&addM?(addH===1?"1 ora e mezza":addH+" ore e mezza"):"mezzora";
-      text="Sono le "+start+". Tra "+delta+", che ora sara?"; hint="parti da "+start+" e aggiungi "+delta;
-      allowed=[target, fh+"."+String(fm).padStart(2,"0"), fh+":"+String(fm).padStart(2,"0")];
-      if(fm===0){ allowed.push(String(fh), String(fh).padStart(2,"0")); const h12=fh>12?fh-12:fh; allowed.push(String(h12), String(h12).padStart(2,"0")); }
-    }
-    return {text:text,target:target,allowed:allowed,cat:cat,hint:hint,a:a,b:b,op:op,kind:type,sig:cat+"_"+text};
+  function fillSettings(){ $("set-name").value=NAME||""; $("set-tutor-name").value=TUTOR_NAME||""; $("set-email").value=TUTOR||""; syncSetSliders(); refreshTutorPanel(); }
+
+  function currentHint(){ if(!cur||!cur.hints) return cur&&cur.hint||""; return cur.hints[Math.min(hintLevel, cur.hints.length-1)]||""; }
+  function showHintFeedback(kind){
+    var fb=$("fb"); fb.classList.remove("hidden"); var h=currentHint();
+    if(kind==="warn"){ theme("warn"); fb.className="fb fb-warn fb-anim-sad1"; fb.innerHTML="Riprova"+(h?"<span class='fb-sub'>"+h+"</span>":""); }
+    else { theme("err"); fb.className="fb fb-err fb-anim-err"; fb.innerHTML=(hintLevel>=3?("Era "+cur.target):"Aiuto")+(h?"<span class='fb-sub'>"+h+"</span>":""); }
   }
   function nextQ(){
-    sessionKind=kindFor(playLevel());
-    let ex=null,tries=0;
-    while(!ex&&tries<40){tries++; const c=build(playLevel()); if(!sigs.includes(c.sig)) ex=c;}
-    if(!ex) ex=build(playLevel());
-    sigs.push(ex.sig); if(sigs.length>60) sigs.shift(); LS.set("m_sigs",JSON.stringify(sigs));
-    cur=ex; attempts=0;
+    cur=selectQuestion(); attempts=0; hintLevel=0; hintsUsed=0; if(cur) cur.hintLevel=0;
     const qel=$("qtext"); qel.textContent=cur.text; qel.classList.remove("anim-pop"); void qel.offsetWidth; qel.classList.add("anim-pop");
     setAns(""); busy=false; replaceNext=false; $("btn-ok").disabled=false; $("fb").className="fb hidden"; resetTheme(); qStart=Date.now();
+    refreshTutorLive();
   }
   function start(){
-    session=[]; level=Math.max(MIN_LEVEL,Math.min(cap,reached||MIN_LEVEL)); updateLevelUI(); show("screen-ex");
+    session=[]; updateLevelUI(); show("screen-ex");
     if(checkTimer) clearTimeout(checkTimer);
     checkTimer=setTimeout(function(){ $("cp-text").textContent="Stai giocando da "+mins+" minut"+(mins===1?"o":"i")+". Continuiamo o ci fermiamo?"; $("checkpoint").classList.remove("hidden"); }, checkSec()*1000);
     nextQ();
   }
-  function errKind(user,ok){
-    if(ok) return ""; if(user==="SKIP") return "skip";
-    const n=parseFloat(String(user).replace(",",".")), a=+cur.a, b=+cur.b, op=cur.op;
-    if((op==="*"||op==="-"||op==="/")&&n===a+b) return "segno";
-    if(op==="*"||cur.kind==="mul") return "tabellina";
-    if(op==="/"||cur.kind==="div") return "tabellina";
-    if((op==="+"||op==="-")&&!Number.isNaN(n)&&Math.abs(n-(+cur.target))===10) return "riporto";
-    return "calcolo";
-  }
-  function log(user,ok,sec){ const rec={ts:new Date().toISOString(),cat:cur.cat,q:cur.text,user:user,correct:cur.target,ok:ok,sec:sec,att:attempts,lvl:playLevel(),kind:cur.kind,err:errKind(user,ok)}; session.push(rec); history.push(rec); }
-  function adjust(ok, mode){
-    if(ok&&attempts===1){
-      winStreak++;
-      if(winStreak>=3 && level<cap){ level++; winStreak=0; }
-    } else {
-      winStreak=0;
-      if(mode!=="mid" && level>MIN_LEVEL) level--;
-    }
-    if(level>cap) level=cap;
-    if(level>reached) reached=level;
-    LS.set("m_level",String(level)); LS.set("m_reached",String(reached)); updateLevelUI();
-  }
   function afterItem(){ nextQ(); }
+  function closeItem(user, ok, unknown, shown){
+    var sec=Math.round((Date.now()-qStart)/1000);
+    session.push(learnFromItem(cur, user, ok, sec, attempts, hintsUsed, unknown, shown));
+    updateLevelUI(); refreshTutorLive();
+  }
+  function normAns(s){ return String(s).toLowerCase().replace(/\s+/g,"").replace(".",":"); }
   function check(){
     if(busy) return; const val=getAns(); if(!val) return; attempts++;
-    const sec=Math.round((Date.now()-qStart)/1000);
-    const ok=cur.allowed.map(function(a){return String(a).toLowerCase();}).includes(val.toLowerCase());
-    const fb=$("fb"); fb.classList.remove("hidden");
+    const ok=cur.allowed.some(function(a){ return normAns(a)===normAns(val); });
     if(ok){
-      theme("ok");
-      fb.className="fb fb-ok fb-anim-joy1"; fb.textContent="Giusto.";
-      var top=document.querySelector(".pane-top");
-      if(top){ top.classList.remove("anim-celeb"); void top.offsetWidth; top.classList.add("anim-celeb"); }
-      var qbox=$("qbox"); qbox.classList.remove("anim-celeb"); void qbox.offsetWidth; qbox.classList.add("anim-celeb");
-      busy=true; $("btn-ok").disabled=true; log(val,true,sec); adjust(true); setTimeout(afterItem,900);
+      theme("ok"); var fb=$("fb"); fb.classList.remove("hidden"); fb.className="fb fb-ok fb-anim-joy1"; fb.textContent="Giusto.";
+      var top=document.querySelector(".pane-top"); if(top){ top.classList.remove("anim-celeb"); void top.offsetWidth; top.classList.add("anim-celeb"); }
+      busy=true; $("btn-ok").disabled=true; closeItem(val,true,false,false); setTimeout(afterItem,900);
     } else {
-      theme("warn"); replaceNext=true;
-      fb.className="fb fb-warn fb-anim-sad1"; fb.innerHTML="Riprova"+(cur.hint?"<span class='fb-sub'>"+cur.hint+"</span>":"");
+      hintLevel=Math.min(3, hintLevel+1); hintsUsed++; if(cur) cur.hintLevel=hintLevel; replaceNext=true;
+      if(hintLevel>=3){ busy=true; $("btn-ok").disabled=true; showHintFeedback("err"); closeItem(val,false,false,true); setTimeout(afterItem,1400); }
+      else { showHintFeedback("warn"); refreshTutorLive(); }
     }
   }
   function skip(){
-    if(busy) return; const sec=Math.round((Date.now()-qStart)/1000);
-    const typed=getAns();
-    const empty=!typed;
-    const fb=$("fb"); fb.classList.remove("hidden"); theme("err");
-    fb.className="fb fb-err fb-anim-err";
-    fb.innerHTML="Era "+cur.target+(cur.hint?"<span class='fb-sub'>"+cur.hint+"</span>":"");
-    busy=true; $("btn-ok").disabled=true;
-    log(empty?"SKIP":("SKIP:"+typed), false, sec);
-    adjust(false, empty?"err":"mid");
-    setTimeout(afterItem,1400);
+    if(busy) return; var typed=getAns(); var empty=!typed;
+    if(hintLevel<3){ hintLevel++; hintsUsed++; if(cur) cur.hintLevel=hintLevel; replaceNext=true; showHintFeedback(hintLevel>=3?"err":"warn"); if(hintLevel<3){ refreshTutorLive(); return; } }
+    attempts=Math.max(attempts,1); busy=true; $("btn-ok").disabled=true; showHintFeedback("err");
+    closeItem(empty?"NON_LO_SO":("SKIP:"+typed), false, empty, !empty); setTimeout(afterItem,1400);
   }
   function finish(title){
-    if(checkTimer) clearTimeout(checkTimer); $("checkpoint").classList.add("hidden");
-    LS.set("m_hist",JSON.stringify(history));
-    const ok=session.filter(function(x){return x.ok;}).length, li=levelInfo(playLevel());
+    if(checkTimer) clearTimeout(checkTimer); $("checkpoint").classList.add("hidden"); saveV2History(); saveV2Profile();
+    const ok=session.filter(function(x){return x.ok;}).length;
     $("end-title").textContent=title;
-    var skip=session.filter(function(x){return String(x.user).indexOf("SKIP")===0;}).length;
-    var skipEmpty=session.filter(function(x){return x.user==="SKIP";}).length;
-    var wrong=session.filter(function(x){return !x.ok && String(x.user).indexOf("SKIP")!==0;}).length + skipEmpty;
-    var errs={}; session.forEach(function(x){if(!x.ok&&x.err) errs[x.err]=(errs[x.err]||0)+1;});
-    var ek=Object.keys(errs);
-    var last7=history.filter(function(h){return Date.now()-new Date(h.ts)<7*864e5;});
-    var last30=history.filter(function(h){return Date.now()-new Date(h.ts)<30*864e5;});
-    var det=session.map(function(x,i){ return (i+1)+". "+x.q+" → "+x.user+(x.ok?" OK":" "+(x.err||"no").toUpperCase()+" (era "+x.correct+")"); }).join("<br>");
-    $("sum").innerHTML="Esercizi fatti: <b>"+session.length+"</b><br>Corretti: <b>"+ok+"</b><br>Difficoltà: <b>"+li.label+"</b> (livello "+playLevel()+"/"+cap+")"+
-      (ek.length?"<br>Tipi: "+ek.map(function(k){return k+" "+errs[k];}).join(", "):"")+
-      "<br>Livello "+playLevel()+" / tetto "+cap+" · "+li.label+
-      "<br><br><b>Dettaglio</b><br>"+det+
-      "<br><br><b>7 giorni</b> "+last7.length+" es · "+last7.filter(function(x){return x.ok;}).length+" ok"+
-      "<br><b>30 giorni</b> "+last30.length+" es · "+last30.filter(function(x){return x.ok;}).length+" ok";
-    $("mail-note").textContent=TUTOR?"Tra pochi secondi si aprirà l’app Mail: per inviare il report al tutor tocca «Invia».":"Nessuna email del tutor impostata: vai in Impostazioni per configurarla e inviare il report.";
-    show("screen-end"); if(!TUTOR) return;
-    
+    var skipN=session.filter(function(x){return x.outcome==="unknown"||x.outcome==="shown";}).length;
+    var auto=session.filter(function(x){return x.outcome==="autonomous";}).length;
     var avg=session.length?Math.round(session.reduce(function(a,x){return a+x.sec;},0)/session.length):0;
-    var last7=history.filter(function(h){return Date.now()-new Date(h.ts)<7*864e5;});
-    var last30=history.filter(function(h){return Date.now()-new Date(h.ts)<30*864e5;});
-    var byDay={};
-    history.forEach(function(h){ var d=new Date(h.ts).toLocaleDateString("it-IT"); if(!byDay[d]) byDay[d]={t:0,o:0,s:0}; byDay[d].t++; if(h.ok) byDay[d].o++; byDay[d].s+=h.sec; });
-    var body="";
-    if(TUTOR_NAME) body+="Ciao "+TUTOR_NAME+",\n\n";
-    body+="REPORT MATEMATICA";
-    if(NAME) body+=" – "+NAME;
-    body+="\n"+new Date().toLocaleString("it-IT")+"\nDifficoltà: "+li.label+" – "+li.desc+" (livello "+playLevel()+"/"+cap+")\n\n";
-    body+="OGGI\nEsercizi: "+session.length+"\nCorretti: "+ok+"\n";
+    $("sum").innerHTML="Oggi: "+session.length+" esercizi, "+ok+" corretti, "+auto+" da solo, "+skipN+" con aiuto finale"+(session.length?", media "+avg+"s":"")+".<br><br>"+parentReportLines().join("<br>");
+    $("mail-note").textContent=TUTOR?"Tra pochi secondi si aprirà l’app Mail.":"Nessuna email tutor in Impostazioni.";
+    show("screen-end"); if(!TUTOR) return;
+    var body=(TUTOR_NAME?("Ciao "+TUTOR_NAME+",\n\n"):"")+"REPORT ALLENAMENTO MATEMATICA"+(NAME?" – "+NAME:"")+"\n"+new Date().toLocaleString("it-IT")+"\nIndicatori di allenamento, non valutazione clinica.\n\nOGGI\nEsercizi: "+session.length+"\nCorretti: "+ok+"\nAutonomi: "+auto+"\n";
     if(session.length) body+="Tempo medio: "+avg+"s\n";
-    if(ek.length) body+="Errori: "+ek.map(function(k){return k+" "+errs[k];}).join(", ")+"\n";
-    body+="\nDettaglio:\n";
-    session.forEach(function(x,n){
-      var line=(n+1)+". "+x.q+" → "+x.user;
-      if(x.ok) line+=x.att>1?(" (OK dopo "+x.att+" tentativi)"):" (OK)";
-      else line+=" ("+(x.err||"SKIP").toUpperCase()+" – soluzione "+x.correct+")";
-      line+=" "+x.sec+"s\n";
-      body+=line;
-    });
-    var o7=last7.filter(function(x){return x.ok;}).length;
-    var o30=last30.filter(function(x){return x.ok;}).length;
-    body+="\nULTIMI 7 GIORNI\nEsercizi: "+last7.length+" | Corretti: "+o7;
-    if(last7.length) body+=" ("+Math.round(100*o7/last7.length)+"%)";
-    body+="\n\nULTIMI 30 GIORNI\nEsercizi: "+last30.length+" | Corretti: "+o30;
-    if(last30.length) body+=" ("+Math.round(100*o30/last30.length)+"%)";
-    body+="\n\nATTIVITÀ (ultime 14)\n";
-    Object.keys(byDay).sort().reverse().slice(0,14).forEach(function(d){ var x=byDay[d]; body+=d+": "+x.t+" es • "+x.o+" ok • media "+Math.round(x.s/x.t)+"s\n"; });
-    if(history.length) body+="\nUltima: "+new Date(history[history.length-1].ts).toLocaleString("it-IT")+"\n";
+    body+="\n"+parentReportLines().join("\n")+"\n\nDettaglio:\n";
+    session.forEach(function(x,n){ body+=(n+1)+". ["+x.skillId+"] "+x.q+" → "+x.user+" · "+x.outcome+" · "+x.sec+"s\n"; });
     setTimeout(function(){ location.href="mailto:"+TUTOR+"?subject="+encodeURIComponent("Report Matematica"+(NAME?" – "+NAME:""))+"&body="+encodeURIComponent(body); },3500);
   }
   function enough(){ finish(NAME?("Per oggi basta "+NAME+", sei stato bravo!"):"Per oggi basta, sei stato bravo!"); }
+
+  function tutorLiveText(){
+    if(!cur) return "Nessuna domanda attiva.";
+    var s=skillById(cur.skillId), st=ensureSkillState(cur.skillId);
+    return ["Competenza: "+(s?s.name:cur.skillId)+" ("+cur.skillId+")","Micro: "+cur.microId+" · "+cur.structure,"Mastery: "+st.mastery+" · "+masteryBand(st.mastery).label,"Tentativi "+st.attempts+" · corrette "+st.correct+" · errate "+st.wrong,"Autonome "+st.autonomousCorrect+" · aiuto "+st.assistedCorrect,"Aiuti domanda: "+hintsUsed+" (livello "+hintLevel+")","Tempo medio: "+st.averageResponseTime+"s","Prossima revisione: "+(st.nextReview||"—"),"Priorità "+Math.round(priorityScore(s,st))+" · "+classifySkill(s,st),"Forzatura: "+(v2Profile.forceMode||"no")+" · dev: "+(devMode?"ON":"OFF")].join("\n");
+  }
+  function refreshTutorLive(){ var el=$("tutor-live"); if(el) el.textContent=tutorLiveText(); }
+  function refreshTutorPanel(){
+    refreshTutorLive();
+    var box=$("tutor-skills"); if(!box) return;
+    box.innerHTML=skillSnapshot().map(function(r){ return "<div class='tutor-row'><strong>"+r.skill.id+"</strong> "+r.st.mastery+" · "+r.bucket+" · t"+r.st.attempts+"</div>"; }).join("");
+  }
+  function setForce(mode){ v2Profile.forceMode=mode||null; saveV2Profile(); refreshTutorPanel(); }
+  function exportV2(){
+    var txt=JSON.stringify({profile:v2Profile,history:v2History,settings:v2Settings,exportedAt:nowISO(),app:"math_training_v2"},null,2);
+    $("tutor-json").value=txt;
+    try{ var a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([txt],{type:"application/json"})); a.download="math_training_v2.json"; a.click(); }catch(e){}
+  }
+  function importV2(){
+    var raw=$("tutor-json").value.trim(); if(!raw) return;
+    try{
+      var data=JSON.parse(raw);
+      if(data.profile) v2Profile=data.profile;
+      if(data.history) v2History=data.history;
+      if(data.settings){ v2Settings=data.settings; NAME=v2Settings.name||NAME; TUTOR_NAME=v2Settings.tutorName||TUTOR_NAME; TUTOR=v2Settings.email||TUTOR; cap=clamp(v2Settings.cap,MIN_LEVEL,MAX_LEVEL); locked=!!v2Settings.locked; mins=clamp(v2Settings.mins||mins,1,10); devMode=!!v2Settings.devMode; packs=normalizePacks(v2Settings.packs); }
+      saveV2Profile(); saveV2History(); saveV2Settings(); fillSettings(); updateMini(); $("tutor-test-out").textContent="Import ok.";
+    }catch(e){ $("tutor-test-out").textContent="JSON non valido."; }
+  }
+  function v2RunSelfTest(){
+    var out=[], pass=0, fail=0;
+    function t(name, cond){ if(cond){ pass++; out.push("OK  "+name); } else { fail++; out.push("FAIL  "+name); } }
+    var snapP=JSON.stringify(v2Profile), snapH=JSON.stringify(v2History), savedDev=devMode, savedPacks=JSON.stringify(packs);
+    devMode=true; packs={addition:true,subtraction:true,multiplication:true,division:true,clock:true,money:true,daily:true};
+    t("add_5 esiste", !!skillById("add_5"));
+    t("mul_2 si genera", !!generateForSkill(skillById("mul_2"),{}));
+    t("div_2 si genera", generateForSkill(skillById("div_2"),{}).op==="/");
+    t("clock_add_60 ha :", String(generateForSkill(skillById("clock_add_60"),{}).target).indexOf(":")>=0);
+    t("money_change numerico", !isNaN(+generateForSkill(skillById("money_change"),{}).target));
+    t("daily quantity", !!generateForSkill(skillById("quantity"),{}));
+    var item=generateForSkill(skillById("add_10"),{});
+    var before=ensureSkillState("add_10").mastery;
+    learnFromItem(item,item.target,true,3,1,0,false,false);
+    t("autonoma alza mastery", ensureSkillState("add_10").mastery>before);
+    var sigs=v2Profile.recentSigs.slice();
+    t("niente sig vuota", sigs.every(function(s){ return !!s; }));
+    t("namespace V2", V2_KEYS.profile.indexOf("math_training_v2_")===0);
+    t("V1 keys distinte", V1_KEYS.indexOf(V2_KEYS.profile)<0);
+    var v1n=LS.get("m_name"); resetV2Profile();
+    t("reset V2 non cancella m_name", LS.get("m_name")===v1n);
+    v2Profile=JSON.parse(snapP); v2History=JSON.parse(snapH); saveV2Profile(); saveV2History();
+    devMode=savedDev; packs=JSON.parse(savedPacks);
+    $("tutor-test-out").textContent=out.join("\n")+"\n\n"+pass+" ok / "+fail+" fail";
+  }
+
   $("pad").addEventListener("pointerdown",function(e){
     const btn=e.target.closest("button"); if(!btn||busy) return; e.preventDefault();
     const k=btn.getAttribute("data-k"), curVal=getAns();
     if(k==="del"){ setAns(curVal.slice(0,-1)); replaceNext=false; }
     else if(replaceNext){ setAns(k===":"?":":k); replaceNext=false; }
-    else if(curVal.length<8) setAns(curVal+k);
+    else if(curVal.length<10) setAns(curVal+k);
   });
   let pressTimer=null; const setBtn=$("btn-settings");
   setBtn.addEventListener("pointerdown",function(e){
     e.preventDefault(); setBtn.classList.add("pressing");
-    pressTimer=setTimeout(function(){ setBtn.classList.remove("pressing"); $("set-name").value=NAME; $("set-tutor-name").value=TUTOR_NAME; $("set-email").value=TUTOR; syncSetSliders(); show("screen-set"); },900);
+    pressTimer=setTimeout(function(){ setBtn.classList.remove("pressing"); fillSettings(); show("screen-set"); },900);
   });
-  ["pointerup","pointerleave","pointercancel"].forEach(function(ev){ setBtn.addEventListener(ev,function(){clearTimeout(pressTimer);setBtn.classList.remove("pressing");}); });
-  $("set-cap").addEventListener("input",function(){ cap=Math.max(MIN_LEVEL,Math.min(MAX_LEVEL,+$("set-cap").value)); syncSetSliders(); updateLevelUI(); });
+  ["pointerup","pointerleave","pointercancel"].forEach(function(ev){ setBtn.addEventListener(ev,function(){ clearTimeout(pressTimer); setBtn.classList.remove("pressing"); }); });
+  $("set-cap").addEventListener("input",function(){ cap=clamp(+$("set-cap").value,MIN_LEVEL,MAX_LEVEL); syncSetSliders(); updateLevelUI(); });
   $("set-lock").addEventListener("click",function(){ locked=!locked; syncLockBtn(); });
-  $("set-mins").addEventListener("input",function(){ mins=Math.max(1,Math.min(10,+$("set-mins").value||2)); $("set-mins-num").textContent=mins+" min"; updateMini(); });
+  $("set-mins").addEventListener("input",function(){ mins=clamp(+$("set-mins").value||2,1,10); $("set-mins-num").textContent=mins+" min"; updateMini(); });
+  $("btn-devmode").addEventListener("click",function(){ devMode=!devMode; syncDevUI(); });
+  $("btn-packs-all").addEventListener("click",function(){ PACKS.forEach(function(k){ packs[k]=true; }); packs=normalizePacks(packs); syncDevUI(); });
+  $("btn-packs-core").addEventListener("click",function(){ packs=defaultPacks(); syncDevUI(); });
+
   function persistSettings(){
     NAME=$("set-name").value.trim(); TUTOR_NAME=$("set-tutor-name").value.trim(); TUTOR=$("set-email").value.trim()||TUTOR;
-    cap=Math.max(MIN_LEVEL,Math.min(MAX_LEVEL,+$("set-cap").value)); mins=Math.max(1,Math.min(10,+$("set-mins").value||2));
-    LS.set("m_name",NAME); LS.set("m_tutor_name",TUTOR_NAME); LS.set("m_email",TUTOR);
-    LS.set("m_cap",String(cap)); LS.set("m_lock",locked?"1":"0"); LS.set("m_mins",String(mins)); LS.set("m_reached",String(reached));
-    updateMini(); updateLevelUI(); syncSetSliders();
+    cap=clamp(+$("set-cap").value,MIN_LEVEL,MAX_LEVEL); mins=clamp(+$("set-mins").value||2,1,10);
+    saveV2Settings(); updateMini(); updateLevelUI(); syncSetSliders();
   }
-  $("btn-save").onclick=function(){
-    openModal("Salvare le impostazioni?", true, function(choice){
-      if(!choice) return;
-      persistSettings();
-      if(choice==="yes") show("screen-menu");
-    }, false, true);
-  };
-  $("btn-reset-level").onclick=function(){ openModal("Azzerare il livello raggiunto?", true, function(ok){ if(!ok) return; level=MIN_LEVEL; reached=MIN_LEVEL; LS.set("m_level","0"); LS.set("m_reached","0"); updateLevelUI(); syncSetSliders(); }, true); };
-  $("btn-reset-hist").onclick=function(){ openModal("Cancellare lo storico dei report?", true, function(ok){ if(!ok) return; history=[]; session=[]; LS.set("m_hist","[]"); }, true); };
-  $("btn-reset-all").onclick=function(){ openModal("Cancellare nome, livello e report?", true, function(ok){ if(!ok) return; LS.clear(); NAME="";TUTOR_NAME="";TUTOR=""; level=MIN_LEVEL; reached=MIN_LEVEL; cap=MAX_LEVEL; locked=false; mins=2; history=[]; session=[]; sigs=[]; $("set-name").value=""; $("set-tutor-name").value=""; $("set-email").value=""; updateMini(); updateLevelUI(); syncSetSliders(); }, true); };
-  $("btn-set-back").onclick=function(){ cap=+LS.get("m_cap"); if(Number.isNaN(cap)) cap=MAX_LEVEL; locked=LS.get("m_lock")==="1"; show("screen-menu"); };
-  $("cp-continue").onclick=function(){ $("checkpoint").classList.add("hidden"); if(checkTimer) clearTimeout(checkTimer); checkTimer=setTimeout(function(){ $("cp-text").textContent="Stai giocando da "+mins+" minut"+(mins===1?"o":"i")+". Continuiamo o ci fermiamo?"; $("checkpoint").classList.remove("hidden"); },checkSec()*1000); };
-  $("cp-stop").onclick=function(){ $("checkpoint").classList.add("hidden"); enough(); };
-  
   var modalCb=null;
   function openModal(text, needCancel, cb, danger, triple){
     $("modal-text").textContent=text;
@@ -599,16 +975,33 @@ Reset livello = solo il raggiunto. Reset report = solo lo storico. Reset tutto =
     $("modal-yes").textContent=triple?"Salva ed esci":(needCancel?"Conferma":"Ok");
     $("modal-stay").textContent="Salva e rimani";
     $("modal-yes").className=danger?"btn btn-danger":"btn";
-    $("modal").classList.remove("hidden");
-    modalCb=cb||null;
+    $("modal").classList.remove("hidden"); modalCb=cb||null;
   }
+  $("btn-save").onclick=function(){ openModal("Salvare le impostazioni?", true, function(choice){ if(!choice) return; persistSettings(); if(choice==="yes") show("screen-menu"); }, false, true); };
+  $("btn-reset-level").onclick=function(){ openModal("Azzerare solo chiavi V1 livello?", true, function(ok){ if(!ok) return; try{ localStorage.removeItem("m_level"); localStorage.removeItem("m_reached"); }catch(e){} updateLevelUI(); syncSetSliders(); }, true); };
+  $("btn-reset-hist").onclick=function(){ openModal("Cancellare solo storico V1?", true, function(ok){ if(!ok) return; try{ localStorage.setItem("m_hist","[]"); }catch(e){} }, true); };
+  $("btn-reset-all").onclick=function(){ openModal("Cancellare solo dati V1? Il profilo V2 resta.", true, function(ok){ if(!ok) return; clearV1KeysOnly(); updateMini(); updateLevelUI(); syncSetSliders(); }, true); };
+  $("btn-set-back").onclick=function(){ var s=v2LoadJSON(V2_KEYS.settings,v2Settings); cap=clamp(s.cap,MIN_LEVEL,MAX_LEVEL); locked=!!s.locked; devMode=!!s.devMode; packs=normalizePacks(s.packs); show("screen-menu"); };
+  $("cp-continue").onclick=function(){ $("checkpoint").classList.add("hidden"); if(checkTimer) clearTimeout(checkTimer); checkTimer=setTimeout(function(){ $("cp-text").textContent="Stai giocando da "+mins+" minut"+(mins===1?"o":"i")+". Continuiamo o ci fermiamo?"; $("checkpoint").classList.remove("hidden"); },checkSec()*1000); };
+  $("cp-stop").onclick=function(){ $("checkpoint").classList.add("hidden"); enough(); };
   $("modal-yes").onclick=function(){ $("modal").classList.add("hidden"); if(modalCb) modalCb("yes"); modalCb=null; };
   $("modal-stay").onclick=function(){ $("modal").classList.add("hidden"); if(modalCb) modalCb("stay"); modalCb=null; };
   $("modal-no").onclick=function(){ $("modal").classList.add("hidden"); if(modalCb) modalCb(false); modalCb=null; };
-$("help-toggle").onclick=function(){ $("help-box").classList.toggle("hidden"); };
-  $("btn-start").onclick=start; $("btn-enough").onclick=enough; $("btn-ok").onclick=check; $("btn-skip").onclick=skip; $("btn-home").onclick=function(){show("screen-menu");};
-  $("scale-info").innerHTML="<table class='scale-table'>"+LEVEL_INFO.map(function(t){var n=t.min===t.max?String(t.min):t.min+"–"+t.max; return "<tr><td class='n'>"+n+"</td><td class='l'>"+t.label+"</td><td class='d'>"+t.desc+"</td></tr>";}).join("")+"</table>";
-  updateMini(); updateLevelUI(); show("screen-menu");
+  $("help-toggle").onclick=function(){ $("help-box").classList.toggle("hidden"); };
+  $("btn-start").onclick=start; $("btn-enough").onclick=enough; $("btn-ok").onclick=check; $("btn-skip").onclick=skip; $("btn-home").onclick=function(){ show("screen-menu"); };
+  $("scale-info").innerHTML="<table class='scale-table'>"+LEVEL_INFO.map(function(t){ var n=t.min===t.max?String(t.min):t.min+"–"+t.max; return "<tr><td class='n'>"+n+"</td><td class='l'>"+t.label+"</td><td class='d'>"+t.desc+"</td></tr>"; }).join("")+"</table>";
+  $("btn-force-easy").onclick=function(){ setForce("easy"); };
+  $("btn-force-review").onclick=function(){ setForce("review"); };
+  $("btn-force-new").onclick=function(){ setForce("novel"); };
+  $("btn-force-off").onclick=function(){ setForce(null); };
+  $("btn-reset-skill").onclick=function(){ if(!cur) return; v2Profile.skills[cur.skillId]=emptySkillState(); saveV2Profile(); refreshTutorPanel(); };
+  $("btn-reset-v2").onclick=function(){ openModal("Azzerare il profilo V2? I dati V1 non vengono toccati.", true, function(ok){ if(!ok) return; resetV2Profile(); refreshTutorPanel(); }, true); };
+  $("btn-show-json").onclick=function(){ $("tutor-json").value=JSON.stringify({profile:v2Profile,history:v2History,settings:v2Settings},null,2); };
+  $("btn-export-v2").onclick=exportV2;
+  $("btn-import-v2").onclick=importV2;
+  $("btn-selftest").onclick=v2RunSelfTest;
+
+  loadV2(); updateMini(); updateLevelUI(); syncDevUI(); show("screen-menu");
 })();
 
 </script>
