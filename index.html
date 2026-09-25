@@ -2,8 +2,8 @@
 <html lang="it"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Math Training · V2</title><meta name="theme-color" content="#5e5ce6">
-<link rel="manifest" href="manifest.webmanifest"><link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png"><link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="Math Training"><link rel="stylesheet" href="assets/styles.css"><link rel="stylesheet" href="assets/calculator-original.css"></head>
+<title>Math Training · V2</title><meta name="theme-color" content="#f6f6fb">
+<link rel="manifest" href="manifest.webmanifest?v=2.10.2"><link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png"><link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="Math Training"><link rel="stylesheet" href="assets/styles.css?v=2.10.2"><link rel="stylesheet" href="assets/calculator-original.css?v=2.10.2"></head>
 <body><div id="storage-warning" class="storage-warning hidden" role="alert">Salvataggio non disponibile: esporta un backup prima di chiudere.</div>
 <div class="card" id="card">
 <div id="screen-menu" class="menu">
@@ -53,15 +53,15 @@
 <div class="set-head"><div><h2>Impostazioni</h2><div class="tutor-sub">Configurazione essenziale</div></div><button type="button" class="x-close" id="btn-set-back" aria-label="Torna indietro">×</button></div>
 <div class="settings-grid">
 <div class="set-card full"><h3>Profilo</h3><div class="set-field"><label for="set-name">Nome</label><input type="text" id="set-name" placeholder="Nome del ragazzo"></div><div class="set-field"><label for="set-tutor-name">Nome tutor</label><input type="text" id="set-tutor-name" placeholder="Nome tutor"></div><div class="set-field"><label for="set-email">Email tutor</label><input type="email" id="set-email" placeholder="tutor@email.com"></div></div>
-<div class="set-card"><h3>Difficoltà massima <button class="info-dot" type="button" data-tip="È il limite oltre il quale il programma non può spingersi. Non indica il livello attuale dell’utente.">i</button></h3><div class="set-inline"><span class="set-value">Tetto massimo</span><span class="set-value" id="set-cap-num">10/10</span></div><input type="range" aria-label="Difficoltà massima" id="set-cap" min="1" max="10" step="1" value="10"><p class="set-desc" id="set-level-desc"></p></div>
-<div class="set-card"><h3>Promemoria pausa <button class="info-dot" type="button" data-tip="Stabilisce dopo quanti minuti l’app propone una pausa. Non modifica la difficoltà.">i</button></h3><div class="set-inline"><span class="set-value">Controllo pausa</span><span class="set-value" id="set-mins-num">2 min</span></div><input type="range" aria-label="Minuti tra i promemoria pausa" id="set-mins" min="1" max="10" step="1" value="2"></div>
+<div class="set-card"><h3>Difficoltà massima <button class="info-dot" type="button" data-tip="È il limite oltre il quale il programma non può spingersi. Non indica il livello attuale dell’utente.">i</button></h3><div class="set-inline"><span class="set-value">Tetto massimo</span><span class="set-value" id="set-cap-num">10/10</span></div><input type="range" aria-label="Difficoltà massima" id="set-cap" min="1" max="10" step="1" value="10"><p class="set-desc" id="set-level-desc" aria-live="polite"></p></div>
+<div class="set-card"><h3>Promemoria pausa <button class="info-dot" type="button" data-tip="Stabilisce dopo quanti minuti l’app propone una pausa. Non modifica la difficoltà.">i</button></h3><div class="set-inline"><span class="set-value">Controllo pausa</span><span class="set-value" id="set-mins-num">2 min</span></div><input type="range" aria-label="Minuti tra i promemoria pausa" id="set-mins" min="1" max="10" step="1" value="2"><p class="set-desc" id="set-mins-desc" aria-live="polite"></p></div>
 <div class="set-card full dashboard-entry"><div><div class="eyebrow">APPRENDIMENTO</div><h3>Area Tutor</h3><p class="set-desc">Quadro dell’utente, punti da rinforzare e programma adattivo corrente. Aprendo salvi le impostazioni.</p></div><button type="button" class="btn" id="btn-open-tutor">Apri dashboard</button></div>
-<div class="set-card full"><h3>Salvataggio</h3><p class="set-desc">Salva le modifiche al profilo e alla sessione.</p><button class="btn tutor-action" id="btn-save">Salva impostazioni</button></div>
+
 <div class="set-card full"><h3>Argomenti</h3><p class="set-desc">Scegli le aree da allenare. Deve restarne attiva almeno una.</p><div id="pack-options" class="pack-options"></div></div><div class="set-card danger-zone full"><h3>Dati</h3><p class="set-desc">Ripristini separati per evitare cancellazioni involontarie.</p><div class="settings-actions"><button class="btn btn-soft" id="btn-reset-level">Reset competenze</button><button class="btn btn-soft" id="btn-reset-hist">Cancella storico</button></div><button class="btn btn-danger tutor-action" id="btn-reset-all">Ripristina tutti i dati V2</button></div>
-</div><div id="tip-pop" class="tip-pop hidden"></div></div>
+<div class="set-card full"><h3>Salvataggio</h3><p class="set-desc">Salva le modifiche al profilo e alla sessione.</p><button class="btn tutor-action" id="btn-save">Salva impostazioni</button></div></div><div id="tip-pop" class="tip-pop hidden"></div></div>
 
 <div id="screen-tutor" class="screen-tutor hidden">
-<div class="tutor-head"><button class="round-back" id="btn-tutor-back" aria-label="Indietro">‹</button><div><div class="eyebrow">AREA TUTOR</div><h2 id="tutor-title">Profilo apprendimento</h2></div><button class="round-menu" id="btn-tech-toggle" aria-label="Strumenti tecnici">⋮</button></div>
+<div class="tutor-head"><button class="round-back" id="btn-tutor-back" aria-label="Indietro">‹</button><div><div class="eyebrow">AREA TUTOR</div><h2 id="tutor-title">Profilo apprendimento</h2></div></div>
 <div class="dash-hero tutor-card"><div><div class="dash-name" id="dash-name">Utente</div><div class="dash-status" id="dash-status">Raccolta dati in corso</div></div><div class="hero-score"><span id="dash-autonomy">0</span><small>% autonomia</small></div></div>
 <div class="metric-grid" id="tutor-kpi"></div>
 <div class="tutor-card" id="learning-status"><h3>Percorso automatico</h3><p id="learning-status-text">Inizia dagli esercizi semplici e si aggiorna dopo ogni risposta.</p></div>
@@ -96,6 +96,6 @@
 <button class="btn" id="modal-yes">Ok</button>
 </div></div></div>
 </div>
-<script src="assets/app.js" defer></script>
+<script src="assets/app.js?v=2.10.2" defer></script>
 <script>if ("serviceWorker" in navigator && location.protocol.startsWith("http")) addEventListener("load", () => navigator.serviceWorker.register("./sw.js"));</script>
 </body></html>

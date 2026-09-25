@@ -1,7 +1,7 @@
-const CACHE = 'math-training-v2-2.10.1';
+const CACHE = 'math-training-v2-2.10.2';
 const FILES = [
-  './', './index.html', './manifest.webmanifest',
-  './assets/styles.css', './assets/calculator-original.css', './assets/app.js',
+  './', './index.html', './manifest.webmanifest?v=2.10.2',
+  './assets/styles.css?v=2.10.2', './assets/calculator-original.css?v=2.10.2', './assets/app.js?v=2.10.2',
   './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'
 ];
 self.addEventListener('install', event => {

@@ -503,7 +503,7 @@
     if(!used.length) return MIN_LEVEL;
     return clamp(Math.round(used.reduce(function(a,s){return a+s.mastery;},0)/used.length/10), MIN_LEVEL, cap);
   }
-  function show(id){ ["screen-menu","screen-ex","screen-end","screen-set","screen-tutor"].forEach(function(s){ var el=$(s); if(el) el.classList.toggle("hidden",s!==id); }); $("card").classList.toggle("is-ex",id==="screen-ex"); if(id==="screen-menu") updateMini(); if(id==="screen-set") fillSettings(); if(id==="screen-tutor"){ try{ refreshTutorDashboard(); }catch(e){ console.error("Tutor dashboard:",e); var pr=$("tutor-priorities"); if(pr) pr.innerHTML="<p>Dashboard non disponibile: dati in aggiornamento.</p>"; } } }
+  function show(id){ ["screen-menu","screen-ex","screen-end","screen-set","screen-tutor"].forEach(function(s){ var el=$(s); if(el) el.classList.toggle("hidden",s!==id); }); $("card").classList.toggle("is-ex",id==="screen-ex"); var themeMeta=document.querySelector('meta[name="theme-color"]'); if(themeMeta) themeMeta.setAttribute("content",id==="screen-ex"?"#111113":(id==="screen-set"||id==="screen-tutor")?"#ffffff":"#f6f6fb"); if(id==="screen-menu") updateMini(); if(id==="screen-set") fillSettings(); if(id==="screen-tutor"){ try{ refreshTutorDashboard(); }catch(e){ console.error("Tutor dashboard:",e); var pr=$("tutor-priorities"); if(pr) pr.innerHTML="<p>Dashboard non disponibile: dati in aggiornamento.</p>"; } } }
   function updateMini(){
     $("coach-text").textContent=NAME?("Ciao "+NAME+"! Pronto a giocare?"):"Ciao! Pronto a giocare?";
     var hint=$("menu-hint");
@@ -520,7 +520,8 @@
   function syncSetSliders(){
     $("set-cap").value=cap; $("set-cap-num").textContent=Math.max(1,cap)+"/10";
     $("set-mins").value=mins; $("set-mins-num").textContent=mins+" min";
-    $("set-level-desc").textContent="Limita la difficoltà degli esercizi. Il percorso parte dalle basi e si adatta alle risposte.";
+    $("set-level-desc").textContent="Fino al gradino "+cap+" su 10. È solo un limite: il livello effettivo cambia con le risposte.";
+    $("set-mins-desc").textContent="Propone una pausa ogni "+mins+" minut"+(mins===1?"o":"i")+". Puoi sempre continuare o fermarti.";
   }
 
   function fillSettings(){
@@ -739,12 +740,12 @@
     else if(e.key==="Enter"&&!["btn-enough","btn-skip","cp-continue","cp-stop"].includes(e.target.id)){e.preventDefault();check();}
   });
   const setBtn=$("btn-settings");let settingsPressTimer=null;
-  setBtn.addEventListener("pointerdown",()=>{setBtn.classList.add("pressing");settingsPressTimer=setTimeout(()=>{setBtn.classList.remove("pressing");show("screen-set");},900);});
+  setBtn.addEventListener("pointerdown",e=>{if(e.pointerType==="mouse"&&e.button!==0)return;clearTimeout(settingsPressTimer);setBtn.classList.remove("pressing");void setBtn.offsetWidth;setBtn.classList.add("pressing");settingsPressTimer=setTimeout(()=>{setBtn.classList.remove("pressing");show("screen-set");},900);});
   ["pointerup","pointercancel","pointerleave"].forEach(ev=>setBtn.addEventListener(ev,()=>{clearTimeout(settingsPressTimer);setBtn.classList.remove("pressing");}));
   setBtn.addEventListener("click",e=>{if(e.detail===0)show("screen-set");});
   $("set-cap").addEventListener("input",function(){ cap=clamp(+$("set-cap").value,MIN_LEVEL,MAX_LEVEL); syncSetSliders(); updateLevelUI(); });
 
-  $("set-mins").addEventListener("input",function(){ mins=clamp(+$("set-mins").value||2,1,10); $("set-mins-num").textContent=mins+" min"; updateMini(); });
+  $("set-mins").addEventListener("input",function(){ mins=clamp(+$("set-mins").value||2,1,10); syncSetSliders(); updateMini(); });
 
   function persistSettings(){
     if(!$("set-email").checkValidity()){$("set-email").reportValidity();return false;}
@@ -794,7 +795,6 @@
 
   $("btn-open-tutor").onclick=function(){ if(persistSettings())show("screen-tutor"); };
   $("btn-tutor-back").onclick=function(){ show("screen-set"); };
-  var techToggle=$("btn-tech-toggle"); if(techToggle) techToggle.onclick=function(){ var p=$("tech-panel"); if(p) p.open=!p.open; };
   document.querySelectorAll(".info-dot").forEach(function(b){ b.onclick=function(){ var p=$("tip-pop"); if(!p) return; p.textContent=b.getAttribute("data-tip")||""; p.classList.remove("hidden"); clearTimeout(window.__tipTimer); window.__tipTimer=setTimeout(function(){p.classList.add("hidden");},4200); }; });
   function refreshTutorDashboard(){
     /* Dashboard tutor isolata: ogni blocco viene renderizzato indipendentemente,
