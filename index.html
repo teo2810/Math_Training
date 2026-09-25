@@ -3,7 +3,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Math Training · V2</title><meta name="theme-color" content="#5e5ce6">
-<link rel="stylesheet" href="assets/styles.css"><link rel="stylesheet" href="assets/calculator-original.css"></head>
+<link rel="manifest" href="manifest.webmanifest"><link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png"><link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="Math Training"><link rel="stylesheet" href="assets/styles.css"><link rel="stylesheet" href="assets/calculator-original.css"></head>
 <body><div id="storage-warning" class="storage-warning hidden" role="alert">Salvataggio non disponibile: esporta un backup prima di chiudere.</div>
 <div class="card" id="card">
 <div id="screen-menu" class="menu">
@@ -97,4 +97,5 @@
 </div></div></div>
 </div>
 <script src="assets/app.js" defer></script>
+<script>if ("serviceWorker" in navigator && location.protocol.startsWith("http")) addEventListener("load", () => navigator.serviceWorker.register("./sw.js"));</script>
 </body></html>

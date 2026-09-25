@@ -1,6 +1,6 @@
 # Math Training V2
 
-**Math Training V2** è un'app per esercitarsi con la matematica attraverso sessioni brevi e un percorso che si adatta alle risposte dell'utente. Funziona nel browser, anche su smartphone, senza account né servizi esterni.
+**Math Training V2** è un'app per esercitarsi con la matematica attraverso sessioni brevi e un percorso che si adatta alle risposte dell'utente. Funziona nel browser, anche su smartphone, senza account né servizi esterni. Può essere aggiunta alla schermata Home su Android e iPhone con icona dedicata.
 
 ## Come funziona
 
@@ -22,4 +22,4 @@ La mappa delle competenze e l'andamento descrivono le risposte raccolte dall'app
 
 ## Disponibilità
 
-App web statica, in italiano, senza dipendenze esterne a runtime. Il codice dell'interfaccia e del motore si trova in `index.html` e `assets/`. Per caricare la pagina serve una connessione; questa versione non installa un servizio per l'uso offline.
+App web statica, in italiano, senza dipendenze esterne a runtime. Il codice dell'interfaccia e del motore si trova in `index.html` e `assets/`. Dopo il primo caricamento online, i file dell’app vengono conservati per riaprirla anche senza rete. I progressi continuano a essere salvati nel browser. La disponibilità offline dipende dalla conservazione dei dati del sito sul dispositivo.
