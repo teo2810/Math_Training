@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="it"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Math Training · V2</title><meta name="theme-color" content="#5e5ce6">
+<link rel="stylesheet" href="assets/styles.css"><link rel="stylesheet" href="assets/calculator-original.css"></head>
+<body><div id="storage-warning" class="storage-warning hidden" role="alert">Salvataggio non disponibile: esporta un backup prima di chiudere.</div>
+<div class="card" id="card">
+<div id="screen-menu" class="menu">
+<div class="menu-icon" aria-hidden="true"><svg viewBox="0 0 64 64" width="42" height="42"><text x="32" y="46" text-anchor="middle" font-size="40" font-weight="800" fill="#fff" font-family="Georgia, serif">&#931;</text></svg></div>
+<div class="eyebrow">MATH TRAINING · V2</div><h1>Un passo alla volta.</h1>
+<p class="coach" id="coach-text">Ciao! Pronto a giocare?</p>
+<div class="menu-actions">
+<button class="btn btn-start" id="btn-start">Inizia</button>
+<button class="btn btn-ghost" id="btn-settings" aria-describedby="settings-help">Impostazioni e tutor</button>
+</div>
+<p class="menu-hint" id="settings-help">Tieni premuto per aprire le impostazioni.<br>Da tastiera: premi Invio.</p><p class="menu-hint" id="menu-hint">Puoi fermarti quando vuoi con «Per oggi basta»: ogni 2 minuti te lo chiederò anch’io.</p>
+</div>
+<div id="screen-ex" class="ex-wrap hidden">
+<div class="pane-top">
+<div class="top"><span id="exercise-context" class="eyebrow"></span>
+<button class="btn-exit" id="btn-enough">Per oggi basta</button>
+</div>
+<div class="question-box" id="qbox"><div class="question anim-pop" id="qtext"></div>
+<div id="question-visual" class="question-visual hidden"></div><div id="fb" class="fb hidden" role="status" aria-live="polite"></div></div>
+</div>
+<div class="pane-bot"><div class="input-zone">
+<div class="answer-format" id="answer-format"></div><div class="ans-show empty" id="ans" role="status" aria-label="Risposta inserita" aria-live="polite">Risposta</div>
+<div class="pad" id="pad">
+<button type="button" data-k="1">1</button><button type="button" data-k="2">2</button><button type="button" data-k="3">3</button>
+<button type="button" data-k="4">4</button><button type="button" data-k="5">5</button><button type="button" data-k="6">6</button>
+<button type="button" data-k="7">7</button><button type="button" data-k="8">8</button><button type="button" data-k="9">9</button>
+<button type="button" data-k=":">:</button><button type="button" data-k="0">0</button><button type="button" data-k="del" aria-label="Cancella ultima cifra">⌫</button>
+</div>
+<div class="pad-actions">
+<button class="btn btn-skip" id="btn-skip">Passa</button>
+<button class="btn btn-ok" id="btn-ok">Conferma</button>
+</div>
+</div></div>
+<div class="checkpoint hidden" id="checkpoint">
+<p class="checkpoint-text" id="cp-text">Continuiamo o ci fermiamo?</p>
+<div class="checkpoint-actions">
+<button class="btn" id="cp-continue">Continua</button>
+<button class="btn btn-soft" id="cp-stop">Per oggi basta</button>
+</div></div></div>
+<div id="screen-end" class="end-screen hidden">
+<h2 id="end-title">Sessione chiusa</h2>
+<div class="summary" id="sum"></div>
+<p class="mail-note" id="mail-note"></p><button class="btn" id="btn-report">Scarica report</button><button class="btn btn-ghost hidden" id="btn-mail">Apri email al tutor</button>
+<button class="btn btn-soft" id="btn-home">Torna all’inizio</button>
+</div>
+<div id="screen-set" class="settings hidden">
+<div class="set-head"><div><h2>Impostazioni</h2><div class="tutor-sub">Configurazione essenziale</div></div><button type="button" class="x-close" id="btn-set-back" aria-label="Torna indietro">×</button></div>
+<div class="settings-grid">
+<div class="set-card full"><h3>Profilo</h3><div class="set-field"><label for="set-name">Nome</label><input type="text" id="set-name" placeholder="Nome del ragazzo"></div><div class="set-field"><label for="set-tutor-name">Nome tutor</label><input type="text" id="set-tutor-name" placeholder="Nome tutor"></div><div class="set-field"><label for="set-email">Email tutor</label><input type="email" id="set-email" placeholder="tutor@email.com"></div></div>
+<div class="set-card"><h3>Difficoltà massima <button class="info-dot" type="button" data-tip="È il limite oltre il quale il programma non può spingersi. Non indica il livello attuale dell’utente.">i</button></h3><div class="set-inline"><span class="set-value">Tetto massimo</span><span class="set-value" id="set-cap-num">10/10</span></div><input type="range" aria-label="Difficoltà massima" id="set-cap" min="1" max="10" step="1" value="10"><p class="set-desc" id="set-level-desc"></p></div>
+<div class="set-card"><h3>Promemoria pausa <button class="info-dot" type="button" data-tip="Stabilisce dopo quanti minuti l’app propone una pausa. Non modifica la difficoltà.">i</button></h3><div class="set-inline"><span class="set-value">Controllo pausa</span><span class="set-value" id="set-mins-num">2 min</span></div><input type="range" aria-label="Minuti tra i promemoria pausa" id="set-mins" min="1" max="10" step="1" value="2"></div>
+<div class="set-card full dashboard-entry"><div><div class="eyebrow">APPRENDIMENTO</div><h3>Area Tutor</h3><p class="set-desc">Quadro dell’utente, punti da rinforzare e programma adattivo corrente. Aprendo salvi le impostazioni.</p></div><button type="button" class="btn" id="btn-open-tutor">Apri dashboard</button></div>
+<div class="set-card full"><h3>Salvataggio</h3><p class="set-desc">Salva le modifiche al profilo e alla sessione.</p><button class="btn tutor-action" id="btn-save">Salva impostazioni</button></div>
+<div class="set-card full"><h3>Argomenti</h3><p class="set-desc">Scegli le aree da allenare. Deve restarne attiva almeno una.</p><div id="pack-options" class="pack-options"></div></div><div class="set-card danger-zone full"><h3>Dati</h3><p class="set-desc">Ripristini separati per evitare cancellazioni involontarie.</p><div class="settings-actions"><button class="btn btn-soft" id="btn-reset-level">Reset competenze</button><button class="btn btn-soft" id="btn-reset-hist">Cancella storico</button></div><button class="btn btn-danger tutor-action" id="btn-reset-all">Ripristina tutti i dati V2</button></div>
+</div><div id="tip-pop" class="tip-pop hidden"></div></div>
+
+<div id="screen-tutor" class="screen-tutor hidden">
+<div class="tutor-head"><button class="round-back" id="btn-tutor-back" aria-label="Indietro">‹</button><div><div class="eyebrow">AREA TUTOR</div><h2 id="tutor-title">Profilo apprendimento</h2></div><button class="round-menu" id="btn-tech-toggle" aria-label="Strumenti tecnici">⋮</button></div>
+<div class="dash-hero tutor-card"><div><div class="dash-name" id="dash-name">Utente</div><div class="dash-status" id="dash-status">Raccolta dati in corso</div></div><div class="hero-score"><span id="dash-autonomy">0</span><small>% autonomia</small></div></div>
+<div class="metric-grid" id="tutor-kpi"></div>
+<div class="tutor-card" id="learning-status"><h3>Percorso automatico</h3><p id="learning-status-text">Inizia dagli esercizi semplici e si aggiorna dopo ogni risposta.</p></div>
+<div class="tutor-card hidden" id="v1-summary"><h3>Storico precedente V1</h3><p id="v1-summary-text"></p></div>
+<div class="tutor-card"><div class="section-title"><h3>Come sta cambiando</h3><span>confronto recente</span></div><div class="trend-chart" id="trend-chart"></div><p class="chart-note" id="trend-note"></p></div>
+<div class="tutor-card"><div class="section-title"><h3>Mappa competenze</h3><span>profilo radar</span></div><div id="skill-bars" class="skill-bars"></div></div>
+<div class="tutor-card focus-card"><div class="section-title"><h3>Dove migliorare</h3><span>priorità attuale</span></div><div id="tutor-priorities"></div></div>
+<div class="tutor-card"><div class="section-title"><h3>Programma automatico</h3><span id="program-state">adattivo</span></div><div id="program-list" class="program-list"></div><p class="chart-note">Il programma usa i risultati reali per scegliere recupero, consolidamento, mantenimento e nuove competenze in base alle prove disponibili.</p></div>
+<div class="tutor-card"><div class="section-title"><h3>Legenda indicatori</h3><span>cosa significano</span></div><div class="legend-clean"><div><b>Autonomia</b><span>Risposte corrette ottenute senza aiuti o secondo tentativo.</span></div><div><b>Indice pratica</b><span>Stima interna basata sulle risposte registrate; non misura da sola la stabilità nel tempo.</span></div><div><b>Errori ricorrenti</b><span>Errori che si ripetono e aumentano la priorità di allenamento.</span></div><div><b>Aiuti</b><span>Quanto supporto è stato necessario per arrivare alla risposta.</span></div><div><b>Tempo medio</b><span>Misura la fluidità della risposta; non è un voto.</span></div><div><b>Mastery</b><span>Indice interno 0–100 usato dal motore per stimare quanto una competenza è consolidata. Non è un voto scolastico.</span></div><div><b>Priorità</b><span>Ordine con cui il motore decide cosa conviene allenare adesso.</span></div></div></div>
+<div class="tutor-card"><h3>Backup e trasferimento</h3><p>Esporta un backup prima di cambiare dispositivo o indirizzo dell’app.</p><div class="settings-actions"><button class="btn" id="backup-export">Esporta backup</button><button class="btn btn-ghost" id="backup-import">Importa backup</button></div><input class="hidden" id="backup-file" type="file" accept="application/json,.json"><p id="backup-status" role="status"></p></div>
+<details class="tutor-card tutor-tech" id="tech-panel"><summary>Strumenti tecnici di sviluppo</summary>
+<section class="tech-guide" aria-labelledby="tech-guide-title">
+<h3 id="tech-guide-title">Guida alle opzioni sviluppatore</h3>
+<p>Servono al tutor per verificare il percorso e i dati. Durante l’uso normale lascia <strong>Automatico</strong>. Le modifiche alle modalità restano attive anche dopo la chiusura dell’app.</p>
+<p class="tech-mode-note" id="tech-mode-note" role="status">Modalità attiva: Automatico</p>
+<dl>
+<div><dt>Recupero · Ripasso · Nuovo</dt><dd>Orientano le prossime domande verso competenze da riprendere, già consolidate o ancora da esplorare, se disponibili. Restano attivi finché non premi Automatico.</dd></div>
+<div><dt>Automatico</dt><dd>Lascia scegliere al programma secondo le risposte. Usalo dopo ogni prova delle modalità precedenti.</dd></div>
+<div><dt>Reset competenza</dt><dd>Azzera gli indici della <strong>ultima competenza mostrata</strong>, dopo conferma. Lo storico delle risposte rimane.</dd></div>
+<div><dt>Reset profilo V2</dt><dd>Azzera competenze e storico V2, dopo conferma. Esporta un backup prima di usarlo.</dd></div>
+<div><dt>Vedi JSON · Esporta · Importa</dt><dd>Mostra i dati nella casella, scarica un backup o importa il JSON incollato. L’importazione sostituisce i dati solo dopo conferma. Per trasferire il profilo usa i pulsanti Backup sopra.</dd></div>
+<div><dt>Test motore</dt><dd>Genera domande di prova e mostra eventuali anomalie qui sotto; non conta come allenamento e non modifica lo storico.</dd></div>
+</dl></section>
+<div class="tutor-tools-grid"><button type="button" class="btn btn-soft" id="btn-force-easy">Recupero</button><button type="button" class="btn btn-soft" id="btn-force-review">Ripasso</button><button type="button" class="btn btn-soft" id="btn-force-new">Nuovo</button><button type="button" class="btn btn-ghost" id="btn-force-off">Automatico</button><button type="button" class="btn btn-soft" id="btn-reset-skill">Reset competenza</button><button type="button" class="btn btn-danger" id="btn-reset-v2">Reset profilo V2</button><button type="button" class="btn btn-soft" id="btn-show-json">Vedi JSON</button><button type="button" class="btn btn-soft" id="btn-export-v2">Esporta</button><button type="button" class="btn btn-soft" id="btn-import-v2">Importa</button><button type="button" class="btn" id="btn-selftest">Test motore</button></div><textarea aria-label="Backup JSON" id="tutor-json" placeholder="JSON profilo V2"></textarea><pre class="tutor-test-out" id="tutor-test-out"></pre></details>
+</div>
+<div class="modal hidden" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-text">
+<div class="modal-box">
+<p id="modal-text"></p>
+<div class="modal-actions" id="modal-actions">
+<button class="btn btn-ghost" id="modal-no">Annulla</button>
+<button class="btn btn-soft" id="modal-stay" style="display:none">Resta qui</button>
+<button class="btn" id="modal-yes">Ok</button>
+</div></div></div>
+</div>
+<script src="assets/app.js" defer></script>
+</body></html>
