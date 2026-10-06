@@ -3,7 +3,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Math Training · V2</title><meta name="theme-color" content="#f6f6fb">
-<link rel="manifest" href="manifest.webmanifest?v=2.10.3"><link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png"><link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="Math Training"><link rel="stylesheet" href="assets/styles.css?v=2.10.3"><link rel="stylesheet" href="assets/calculator-original.css?v=2.10.3"></head>
+<link rel="manifest" href="manifest.webmanifest?v=2.11.0"><link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png"><link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="Math Training"><link rel="stylesheet" href="assets/styles.css?v=2.11.0"><link rel="stylesheet" href="assets/calculator-original.css?v=2.11.0"></head>
 <body><div id="storage-warning" class="storage-warning hidden" role="alert">Salvataggio non disponibile: esporta un backup prima di chiudere.</div>
 <div class="card" id="card">
 <div id="screen-menu" class="menu">
@@ -64,6 +64,12 @@
 <div class="tutor-head"><button class="round-back" id="btn-tutor-back" aria-label="Indietro">‹</button><div><div class="eyebrow">AREA TUTOR</div><h2 id="tutor-title">Profilo apprendimento</h2></div></div>
 <div class="dash-hero tutor-card"><div><div class="dash-name" id="dash-name">Utente</div><div class="dash-status" id="dash-status">Raccolta dati in corso</div></div><div class="hero-score"><span id="dash-autonomy">0</span><small>% autonomia</small></div></div>
 <div class="metric-grid" id="tutor-kpi"></div>
+<div class="dashboard-grid">
+<div class="tutor-card"><div class="section-title"><h3>Attività</h3><span id="calendar-period">ultimi 35 giorni</span></div><div id="activity-calendar" class="activity-calendar"></div><p class="chart-note" id="calendar-note"></p></div>
+<div class="tutor-card"><div class="section-title"><h3>Modalità e livello</h3><span>stato corrente</span></div><div id="mode-overview" class="mode-overview"></div></div>
+</div>
+<div class="tutor-card"><div class="section-title"><h3>Distribuzione allenamento</h3><span>ultime 30 prove</span></div><div id="training-distribution" class="distribution-chart"></div></div>
+<div class="tutor-card"><div class="section-title"><h3>Sessioni recenti</h3><span>storico V2</span></div><div id="session-history" class="session-history"></div></div>
 <div class="tutor-card" id="learning-status"><h3>Percorso automatico</h3><p id="learning-status-text">Inizia dagli esercizi semplici e si aggiorna dopo ogni risposta.</p></div>
 <div class="tutor-card hidden" id="v1-summary"><h3>Storico precedente V1</h3><p id="v1-summary-text"></p></div>
 <div class="tutor-card"><div class="section-title"><h3>Come sta cambiando</h3><span>confronto recente</span></div><div class="trend-chart" id="trend-chart"></div><p class="chart-note" id="trend-note"></p></div>
@@ -96,6 +102,6 @@
 <button class="btn" id="modal-yes">Ok</button>
 </div></div></div>
 </div>
-<script src="assets/app.js?v=2.10.3" defer></script>
+<script src="assets/app.js?v=2.11.0" defer></script>
 <script>if ("serviceWorker" in navigator && location.protocol.startsWith("http")) addEventListener("load", () => navigator.serviceWorker.register("./sw.js"));</script>
 </body></html>
