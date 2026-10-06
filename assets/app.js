@@ -58,7 +58,7 @@
   const checkSec=()=>mins*60;
   let level=MIN_LEVEL, reached=MIN_LEVEL;
   let advanceTimer=null, active=false, pausedAt=0, checkpointDue=false, reportText="", focusBeforeModal=null;
-  let session=[],cur=null,attempts=0,busy=false,qStart=0,checkTimer=null,replaceNext=false,hintLevel=0,hintsUsed=0;
+  let session=[],sessionId=null,sessionStartedAt=null,cur=null,attempts=0,busy=false,qStart=0,checkTimer=null,replaceNext=false,hintLevel=0,hintsUsed=0;
   const $=id=>document.getElementById(id);
   const rand=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
 
@@ -110,11 +110,11 @@
     cap=v2Settings.cap; mins=v2Settings.mins; locked=false; devMode=false; packs=normalizePacks(v2Settings.packs);
   }
 
-  function saveState(){if(storageCorrupt)return false;return v2SaveJSON(V2_KEYS.state,{release:"2.10.0",profile:v2Profile,history:v2History,settings:v2Settings});}
+  function saveState(){if(storageCorrupt)return false;return v2SaveJSON(V2_KEYS.state,{release:"2.11.0",profile:v2Profile,history:v2History,settings:v2Settings});}
   function saveV2Profile(){ v2Profile.updatedAt=nowISO(); return saveState(); }
   function saveV2History(){ v2History=v2History.slice(-V2_CFG.maxHistory);return saveState(); }
   function saveV2Settings(){
-    v2Settings={release:"2.10.0",name:NAME,tutorName:TUTOR_NAME,email:TUTOR,cap:cap,locked:locked,mins:mins,devMode:devMode,packs:normalizePacks(packs)};
+    v2Settings={release:"2.11.0",name:NAME,tutorName:TUTOR_NAME,email:TUTOR,cap:cap,locked:locked,mins:mins,devMode:devMode,packs:normalizePacks(packs)};
     return saveState();
   }
   function resetV2Profile(){ storageCorrupt=false;$("btn-start").disabled=false;$("storage-warning").classList.add("hidden");v2Profile=emptyProfile(); v2History=[]; saveV2Profile(); saveV2History(); }
@@ -490,7 +490,7 @@
     v2Profile.recentSigs.push(item.sig); if(v2Profile.recentSigs.length>60) v2Profile.recentSigs.shift();
     v2Profile.recentEq.push(item.eqSig); if(v2Profile.recentEq.length>40) v2Profile.recentEq.shift();
     v2Profile.recentMicros.push(item.microId); if(v2Profile.recentMicros.length>20) v2Profile.recentMicros.shift();
-    var rec={ts:nowISO(),skillId:item.skillId,microId:item.microId,sig:item.sig,eqSig:item.eqSig,structure:item.structure,q:item.text,user:user,correct:item.target,ok:!!ok,sec:sec,att:attempts,hintsUsed:hintsN||0,hintLevel:item.hintLevel||0,outcome:outcome,autonomous:outcome==="autonomous",masteryAfter:st.mastery,phase:phaseBefore,difficulty:skillById(item.skillId).difficulty,tierBefore:tierBefore,tierAfter:v2Profile.diagnostic.level,mode:v2Profile.forceMode||"automatico"};
+    var rec={ts:nowISO(),sessionId:sessionId||null,sessionStartedAt:sessionStartedAt||null,skillId:item.skillId,microId:item.microId,sig:item.sig,eqSig:item.eqSig,structure:item.structure,q:item.text,user:user,correct:item.target,ok:!!ok,sec:sec,att:attempts,hintsUsed:hintsN||0,hintLevel:item.hintLevel||0,outcome:outcome,autonomous:outcome==="autonomous",masteryAfter:st.mastery,phase:phaseBefore,difficulty:skillById(item.skillId).difficulty,tierBefore:tierBefore,tierAfter:v2Profile.diagnostic.level,mode:v2Profile.forceMode||"automatico"};
     v2History.push(rec); v2History=v2History.slice(-V2_CFG.maxHistory); saveV2Profile(); saveV2History(); return rec;
   }
 
@@ -623,7 +623,7 @@
   }
   function start(){
     clearTimeout(advanceTimer); clearTimeout(checkTimer); active=true; pausedAt=0; checkpointDue=false;
-    $("checkpoint").classList.add("hidden"); session=[]; updateLevelUI(); show("screen-ex"); schedulePause(); nextQ();
+    $("checkpoint").classList.add("hidden"); session=[]; sessionStartedAt=nowISO(); sessionId="s_"+Date.now().toString(36); updateLevelUI(); show("screen-ex"); schedulePause(); nextQ();
   }
   function schedulePause(){
     clearTimeout(checkTimer); checkTimer=setTimeout(function(){checkpointDue=true;if(!busy) pauseSession();},checkSec()*1000);
@@ -707,7 +707,7 @@
     a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
   }
   function exportV2(){
-    var txt=JSON.stringify({profile:v2Profile,history:v2History,settings:v2Settings,exportedAt:nowISO(),app:"math_training_v2",release:"2.10.0"},null,2);
+    var txt=JSON.stringify({profile:v2Profile,history:v2History,settings:v2Settings,exportedAt:nowISO(),app:"math_training_v2",release:"2.11.0"},null,2);
     $("tutor-json").value=txt;downloadFile("math-training-backup.json",txt,"application/json");
   }
 
@@ -731,7 +731,7 @@
     clean.lastSkillId=skillById(p.lastSkillId)?p.lastSkillId:null;clean.createdAt=Number.isFinite(Date.parse(p.createdAt))?p.createdAt:nowISO();
     var history=data.history.slice(-V2_CFG.maxHistory).map(function(x){
       if(!x||!skillById(x.skillId)||!Number.isFinite(x.sec)||x.sec<0||!Number.isFinite(Date.parse(x.ts))||!Object.hasOwn(V2_CFG.masteryDelta,x.outcome))throw Error("Storico non valido.");
-      var y={};["ts","skillId","microId","sig","eqSig","structure","q","user","correct","outcome"].forEach(k=>y[k]=String(x[k]??"").slice(0,1000));
+      var y={};["ts","skillId","microId","sig","eqSig","structure","q","user","correct","outcome"].forEach(k=>y[k]=String(x[k]??"").slice(0,1000)); y.sessionId=x.sessionId?String(x.sessionId).slice(0,80):null; y.sessionStartedAt=x.sessionStartedAt&&Number.isFinite(Date.parse(x.sessionStartedAt))?x.sessionStartedAt:null;
       ["sec","att","hintsUsed","hintLevel","masteryAfter"].forEach(k=>y[k]=Number.isFinite(x[k])?Math.max(0,x[k]):0);
       ["difficulty","tierBefore","tierAfter"].forEach(k=>y[k]=Number.isFinite(x[k])?clamp(x[k],1,10):null);
       y.phase=["quadro_iniziale","allenamento_adattivo"].includes(x.phase)?x.phase:null;
@@ -742,7 +742,7 @@
       clean.diagnostic={count:clamp(p.diagnostic.count,0,30),level:clamp(p.diagnostic.level,1,10),streak:clamp(p.diagnostic.streak,0,2)};
     }else history.slice(0,30).forEach(x=>advanceDiagnostic(clean.diagnostic,x.outcome));
     var s=data.settings;if(typeof s!=="object"||Array.isArray(s))throw Error("Impostazioni non valide.");
-    var settings=emptyV2Settings();settings.release="2.10.0";["name","tutorName","email"].forEach(k=>settings[k]=String(s[k]??"").slice(0,150));
+    var settings=emptyV2Settings();settings.release="2.11.0";["name","tutorName","email"].forEach(k=>settings[k]=String(s[k]??"").slice(0,150));
     settings.cap=Number.isFinite(s.cap)?clamp(s.cap,1,10):10;settings.mins=Number.isFinite(s.mins)?clamp(s.mins,1,10):2;settings.packs=normalizePacks(s.packs);
     // Earlier releases ignored pack selection outside dev mode.
     if(!data.release&&!s.release&&!s.devMode)settings.packs=defaultPacks();
@@ -829,7 +829,11 @@
   document.addEventListener("visibilitychange",function(){if(document.visibilityState==="hidden"&&active)pauseSession();});
   $("backup-export").onclick=exportV2;$("backup-import").onclick=()=>$("backup-file").click();
   $("backup-file").onchange=async function(){var f=this.files[0];if(f){if(f.size>5000000){$("backup-status").textContent="Backup troppo grande.";return;}importText(await f.text());}this.value="";};
-  $("btn-report").onclick=()=>downloadFile("math-training-report.txt",reportText,"text/plain;charset=utf-8");
+  $("btn-report").onclick=function(){
+    var title="Math Training V2 — "+(NAME||"Utente"), esc=function(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});};
+    var html="<!doctype html><html lang='it'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width'><title>"+esc(title)+"</title><style>body{font-family:system-ui,-apple-system,sans-serif;max-width:900px;margin:40px auto;padding:0 24px;color:#202136}h1{margin-bottom:4px}.sub{color:#666;margin-bottom:28px}.box{border:1px solid #ddd;border-radius:16px;padding:20px;margin:14px 0}pre{white-space:pre-wrap;font:14px/1.6 system-ui}@media print{body{margin:0}.box{break-inside:avoid}}</style></head><body><h1>"+esc(title)+"</h1><div class='sub'>"+esc(new Date().toLocaleString("it-IT"))+"</div><div class='box'><pre>"+esc(reportText)+"</pre></div></body></html>";
+    downloadFile("math-training-report.html",html,"text/html;charset=utf-8");
+  };
   $("btn-mail").onclick=()=>{location.href="mailto:"+encodeURIComponent(TUTOR)+"?subject="+encodeURIComponent("Report Math Training")+"&body="+encodeURIComponent(reportText.slice(0,1600)+"\n\nAllega il report scaricato per tutti i dettagli.");};
   $("btn-start").onclick=start; $("btn-enough").onclick=enough; $("btn-ok").onclick=check; $("btn-skip").onclick=skip; $("btn-home").onclick=function(){ show("screen-menu"); };
   $("btn-force-easy").onclick=function(){ setForce("easy"); };
@@ -838,7 +842,7 @@
   $("btn-force-off").onclick=function(){ setForce(null); };
   $("btn-reset-skill").onclick=function(){ if(!cur){openModal("Nessuna competenza selezionata. Completa prima una sessione.",false);return;}openModal("Azzerare la competenza «"+skillById(cur.skillId).name+"»?",true,function(ok){if(ok){v2Profile.skills[cur.skillId]=emptySkillState();saveV2Profile();refreshTutorDashboard();}},true); };
   $("btn-reset-v2").onclick=function(){ openModal("Azzerare il profilo V2? I dati V1 non vengono toccati.", true, function(ok){ if(!ok) return; resetV2Profile(); refreshTutorPanel(); refreshTutorDashboard(); }, true); };
-  $("btn-show-json").onclick=function(){ $("tutor-json").value=JSON.stringify({release:"2.10.0",profile:v2Profile,history:v2History,settings:v2Settings},null,2); };
+  $("btn-show-json").onclick=function(){ $("tutor-json").value=JSON.stringify({release:"2.11.0",profile:v2Profile,history:v2History,settings:v2Settings},null,2); };
   $("btn-export-v2").onclick=exportV2;
   $("btn-import-v2").onclick=importV2;
   $("btn-selftest").onclick=v2RunSelfTest;
@@ -846,7 +850,39 @@
   $("btn-open-tutor").onclick=function(){ if(persistSettings())show("screen-tutor"); };
   $("btn-tutor-back").onclick=function(){ show("screen-set"); };
   document.querySelectorAll(".info-dot").forEach(function(b){ b.onclick=function(){ var p=$("tip-pop"); if(!p) return; p.textContent=b.getAttribute("data-tip")||""; p.classList.remove("hidden"); clearTimeout(window.__tipTimer); window.__tipTimer=setTimeout(function(){p.classList.add("hidden");},4200); }; });
+  function renderTutorOverview(){
+    var hist=Array.isArray(v2History)?v2History:[];
+    var modeNames={automatico:"Automatica",easy:"Recupero",review:"Ripasso",novel:"Nuovo"};
+    var modeNow=modeNames[v2Profile.forceMode]||"Automatica";
+    var phase=v2Profile.diagnostic.count<30?"Quadro iniziale":"Adattivo continuo";
+    var mo=$("mode-overview");
+    if(mo) mo.innerHTML="<div class='mode-main'><b>"+modeNow+"</b><span>modalità attiva</span></div><div class='mode-stats'><div><b>"+phase+"</b><span>fase</span></div><div><b>"+v2Profile.diagnostic.level+"/10</b><span>gradino</span></div><div><b>"+cap+"/10</b><span>limite</span></div></div>";
+
+    var recent=hist.slice(-30), counts={};
+    recent.forEach(function(x){var s=skillById(x.skillId),k=s?s.category:"altro";counts[k]=(counts[k]||0)+1;});
+    var max=Math.max(1,...Object.values(counts)), dist=$("training-distribution");
+    if(dist) dist.innerHTML=recent.length?PACKS.filter(function(p){return counts[p];}).sort(function(a,b){return counts[b]-counts[a];}).map(function(p){var n=counts[p]||0;return "<div class='dist-row'><span>"+PACK_LABEL[p]+"</span><div class='dist-track'><i style='width:"+Math.round(n/max*100)+"%'></i></div><b>"+n+"</b></div>";}).join(""):"<div class='trend-empty'>Nessuna prova V2 registrata.</div>";
+
+    var byDay={};
+    hist.forEach(function(x){if(!x.ts)return;var d=new Date(x.ts),key=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");byDay[key]=(byDay[key]||0)+1;});
+    var days=[],today=new Date();today.setHours(12,0,0,0);
+    for(var i=34;i>=0;i--){var d=new Date(today);d.setDate(d.getDate()-i);var key=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");days.push({key:key,n:byDay[key]||0,label:d.toLocaleDateString("it-IT",{day:"2-digit",month:"short"})});}
+    var cal=$("activity-calendar");if(cal)cal.innerHTML=days.map(function(d){var level=d.n===0?0:d.n<5?1:d.n<10?2:d.n<20?3:4;return "<div class='activity-day l"+level+"' title='"+d.label+" · "+d.n+" esercizi' aria-label='"+d.label+", "+d.n+" esercizi'><span>"+d.n+"</span></div>";}).join("");
+    var activeDays=days.filter(function(d){return d.n>0;}).length,total35=days.reduce(function(a,d){return a+d.n;},0),cn=$("calendar-note");if(cn)cn.textContent=activeDays+" giorni di attività · "+total35+" esercizi negli ultimi 35 giorni.";
+
+    var groups=[],map={};
+    hist.forEach(function(x){
+      var day=new Date(x.ts).toLocaleDateString("it-IT"),key=x.sessionId||("legacy_"+day);
+      if(!map[key]){map[key]={key:key,day:day,ts:x.sessionStartedAt||x.ts,items:[],mode:x.mode||"automatico"};groups.push(map[key]);}
+      map[key].items.push(x);
+    });
+    groups=groups.slice(-8).reverse();
+    var sh=$("session-history");
+    if(sh)sh.innerHTML=groups.length?groups.map(function(g){var n=g.items.length,ok=g.items.filter(x=>x.ok).length,au=g.items.filter(x=>x.autonomous).length,h=g.items.reduce((a,x)=>a+(x.hintsUsed||0),0),avg=Math.round(g.items.reduce((a,x)=>a+(x.sec||0),0)/Math.max(1,n)),maxD=Math.max(...g.items.map(x=>x.difficulty||0));return "<details class='session-row'><summary><div><b>"+g.day+"</b><span>"+n+" esercizi · "+Math.round(au/n*100)+"% autonomia</span></div><strong>"+(modeNames[g.mode]||g.mode)+"</strong></summary><div class='session-detail'><span>"+ok+"/"+n+" corretti</span><span>"+h+" aiuti</span><span>"+avg+"s medi</span><span>max "+maxD+"/10</span></div><div class='session-questions'>"+g.items.slice(-12).map(function(x){var s=skillById(x.skillId);return "<div><span>"+(s?s.name:x.skillId)+"</span><b>"+(x.ok?"OK":"KO")+"</b></div>";}).join("")+"</div></details>";}).join(""):"<div class='trend-empty'>Le sessioni V2 compariranno qui.</div>";
+  }
+
   function refreshTutorDashboard(){
+    try{renderTutorOverview();}catch(e){console.error("Tutor overview",e);}
     /* Dashboard tutor isolata: ogni blocco viene renderizzato indipendentemente,
        così un grafico non può più bloccare il resto della schermata. */
     $("program-state").textContent=({easy:"recupero richiesto",review:"ripasso richiesto",novel:"esplorazione richiesta"})[v2Profile.forceMode]||"adattivo";
