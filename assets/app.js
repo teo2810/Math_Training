@@ -382,6 +382,19 @@
     if(r<m.recovery+m.consolidate+m.maintain) return "maintain";
     return "novel";
   }
+  function recentSkillRun(id){
+    var n=0; for(var i=v2History.length-1;i>=0;i--){ if(v2History[i].skillId!==id) break; n++; } return n;
+  }
+  function recentCategoryRun(category){
+    var n=0; for(var i=v2History.length-1;i>=0;i--){ var s=skillById(v2History[i].skillId); if(!s||s.category!==category) break; n++; } return n;
+  }
+  function maintenanceCooldown(skill,st){
+    if(!st||st.mastery<81||!st.lastSeen) return false;
+    if(st.nextReview && new Date(st.nextReview).getTime()<=Date.now()) return false;
+    var since=0;
+    for(var i=v2History.length-1;i>=0;i--){ if(v2History[i].skillId===skill.id) break; since++; }
+    return since<6;
+  }
   function selectSkill(){
     var allAllowed=implementedSkills().filter(function(s){ return skillAllowedByCap(s); });
     var pool=allAllowed.filter(function(s){
@@ -417,6 +430,15 @@
 
     if(!pool.length) pool=allAllowed;
     if(!pool.length) throw Error("Nessuna competenza disponibile: alza il limite di difficoltà.");
+
+    // Anti-ripetizione per competenza e categoria. Le varianti diverse della stessa
+    // domanda non devono aggirare il filtro. Le competenze solide restano in
+    // mantenimento, ma vanno in cooldown finché non sono dovute.
+    var alternatives=pool.filter(function(s){ return recentSkillRun(s.id)<2 && !maintenanceCooldown(s,ensureSkillState(s.id)); });
+    if(alternatives.length) pool=alternatives;
+    var categoryAlternatives=pool.filter(function(s){ return recentCategoryRun(s.category)<3; });
+    if(categoryAlternatives.length) pool=categoryAlternatives;
+
     var bucket=pickBucket(), order=[bucket,"recovery","consolidate","maintain","novel"], seen={};
     for(var i=0;i<order.length;i++){
       var b=order[i]; if(seen[b]) continue; seen[b]=1;
@@ -477,12 +499,22 @@
   }
   function parentReportLines(){
     var rows=skillSnapshot();
-    var acquired=rows.filter(function(r){ return r.st.attempts>=V2_CFG.minAttemptsAcquired && r.st.mastery>=81; });
-    var unstable=rows.filter(function(r){ return r.st.attempts>0 && r.st.mastery<=60; });
-    var review=rows.filter(function(r){ return r.st.nextReview && new Date(r.st.nextReview).getTime()<=Date.now(); });
+    var now=Date.now();
+    // Stati principali esclusivi: una competenza non compare contemporaneamente
+    // tra solide, da rinforzare e da ripassare.
+    var review=rows.filter(function(r){ return r.st.attempts>0 && r.st.mastery>60 && r.st.nextReview && new Date(r.st.nextReview).getTime()<=now; });
+    var reviewIds=new Set(review.map(function(r){return r.skill.id;}));
+    var acquired=rows.filter(function(r){ return r.st.attempts>=V2_CFG.minAttemptsAcquired && r.st.mastery>=81 && !reviewIds.has(r.skill.id); });
+    var unstable=rows.filter(function(r){ return r.st.attempts>0 && r.st.mastery<=60 && !reviewIds.has(r.skill.id); });
     var recent=v2History.slice(-12);
+    var modeLabel={easy:"Recupero",review:"Ripasso",novel:"Nuovo"};
+    var effectiveMode=modeLabel[v2Profile.forceMode]||"Automatica";
+    var phase=v2Profile.diagnostic.count<30?"Quadro iniziale":"Allenamento adattivo continuo";
     var lines=["Allenamento osservato (non è una valutazione clinica)."];
-    lines.push("Percorso V2: "+(v2Profile.diagnostic.count<30?"quadro iniziale "+v2Profile.diagnostic.count+"/30 · gradino "+v2Profile.diagnostic.level:"allenamento adattivo continuo")+" · modalità "+(v2Profile.forceMode||"automatica")+" · limite "+cap+"/10");
+    lines.push("Modalità effettiva: "+effectiveMode);
+    lines.push("Fase adattiva: "+phase+(v2Profile.diagnostic.count<30?" · "+v2Profile.diagnostic.count+"/30 prove · gradino "+v2Profile.diagnostic.level+"/10":""));
+    lines.push("Difficoltà massima consentita: "+cap+"/10");
+    lines.push("Argomenti attivi: "+PACKS.filter(function(k){return packOn(k);}).map(function(k){return PACK_LABEL[k];}).join(", "));
     var old=v1Summary();if(old&&old.total)lines.push("Storico V1 conservato separatamente: "+old.total+" esercizi, "+old.correct+" corretti.");
     lines.push("Competenze più solide: "+(acquired.map(function(r){return r.skill.name;}).join(", ")||"ancora nessuna con abbastanza prove"));
     lines.push("Da rinforzare: "+(unstable.map(function(r){return r.skill.name;}).join(", ")||"nessuna evidenza recente"));
@@ -493,6 +525,18 @@
     var timed=recent.filter(function(x){return x.sec;});
     var avg=timed.length?Math.round(timed.reduce(function(a,x){return a+x.sec;},0)/timed.length):0;
     lines.push("Tempo medio recente: "+(avg?avg+"s":"—"));
+
+    if(session.length){
+      var bySkill={};
+      session.forEach(function(x){ var s=skillById(x.skillId), name=s?s.name:x.skillId; if(!bySkill[name])bySkill[name]={n:0,ok:0,auto:0,hints:0}; var z=bySkill[name];z.n++;if(x.ok)z.ok++;if(x.autonomous)z.auto++;z.hints+=x.hintsUsed||0; });
+      var dist=Object.keys(bySkill).sort(function(a,b){return bySkill[b].n-bySkill[a].n;});
+      lines.push("");
+      lines.push("Distribuzione sessione per competenza:");
+      dist.forEach(function(name){var z=bySkill[name];lines.push("- "+name+": "+z.n+" esercizi · "+z.ok+" corretti · "+z.auto+" autonomi · "+z.hints+" aiuti");});
+      var maxRun=1,run=1;
+      for(var i=1;i<session.length;i++){if(session[i].skillId===session[i-1].skillId){run++;maxRun=Math.max(maxRun,run);}else run=1;}
+      lines.push("Ripetizione massima consecutiva della stessa competenza: "+maxRun);
+    }
     return lines;
   }
 
@@ -721,7 +765,13 @@
   function v2RunSelfTest(){
     var failures=[],count=0;
     SKILLS.forEach(s=>{for(var i=0;i<100;i++){var item=generateForSkill(s,{});count++;if(item.skillId!==s.id||!item.allowed.includes(item.target)||(!item.target.includes(":")&&(!Number.isFinite(+item.target)||+item.target<0)))failures.push(s.id);}});
-    $("tutor-test-out").textContent=count+" esercizi generati · "+failures.length+" anomalie";
+    // Verifica anche la regola anti-ripetizione senza modificare il profilo reale.
+    var antiRepeatOk=true;
+    var eligible=implementedSkills().filter(function(s){return skillAllowedByCap(s)&&skillUnlocked(s);});
+    if(eligible.length>1){
+      eligible.forEach(function(s){if(recentSkillRun(s.id)>2)antiRepeatOk=false;});
+    }
+    $("tutor-test-out").textContent=count+" esercizi generati · "+failures.length+" anomalie generatori · anti-ripetizione "+(antiRepeatOk?"OK":"da verificare");
   }
 
   function inputKey(k){
